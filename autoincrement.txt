@@ -1,0 +1,3 @@
+SET  @num := 0;
+UPDATE stu_marks SET S_No = @num := (@num+1);
+ALTER TABLE stu_marks AUTO_INCREMENT =1;

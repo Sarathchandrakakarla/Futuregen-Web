@@ -1,0 +1,402 @@
+/* GOOGLE FONT */
+@import url("https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap");
+
+html {
+  font-family: "Karla", sans-serif;
+}
+
+/* Root tokens */
+:root {
+  --vs-bg: #05060a;
+  --vs-surface: #0b0f18;
+  --vs-surface-soft: #151926;
+  --vs-accent: #f2a53a;
+  --vs-accent-soft: rgba(242, 165, 58, 0.25);
+  --vs-text: #ffffff;
+  --vs-text-muted: #c3c6d7;
+  --vs-radius-lg: 18px;
+  --vs-radius-xl: 24px;
+  --vs-shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.65);
+  --vs-transition-fast: 0.22s ease-out;
+}
+
+/* MAIN LAYOUT */
+/* body: no flex, just background color if you want */
+body {
+  margin: 0;
+  font-family: "Karla", sans-serif;
+  background: #05060a;
+}
+
+/* make vs-hero full screen and centered */
+.vs-hero {
+  position: relative;
+  min-height: 100vh; /* full screen */
+  width: 100%;
+  max-width: none; /* let it stretch full width */
+  background: radial-gradient(circle at top, #171c2c 0, #05060a 65%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* or center if you want everything vertically centered */
+  padding: 3.5rem 1.5rem 2.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+/* Background pattern */
+
+.vs-bg-pattern {
+  position: absolute;
+  inset: -80px;
+  opacity: 0.18;
+  pointer-events: none;
+  user-select: none;
+  object-fit: cover;
+}
+
+/* PHOTO BAND */
+
+.vs-photo-band {
+  position: relative;
+  margin: 1.5rem auto 2.5rem;
+  border-radius: 26px;
+  overflow: hidden;
+  max-width: 900px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.8);
+}
+
+.vs-photo-band img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.55) blur(0.2px);
+}
+
+/* gradient overlay so text on top is readable */
+.vs-photo-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 6, 10, 0.1) 0%,
+    rgba(5, 6, 10, 0.5) 50%,
+    rgba(5, 6, 10, 0.85) 100%
+  );
+}
+
+/* LOGO */
+
+.vs-logo-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.vs-logo {
+  width: 120px;
+  height: auto;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.18),
+    transparent 65%
+  );
+  padding: 0.35rem;
+  box-shadow:
+    0 0 0 6px rgba(12, 177, 93, 0.12),
+    0 0 24px rgba(0, 0, 0, 0.9);
+}
+
+/* CONTENT */
+
+.vs-content {
+  position: relative;
+  text-align: center;
+  margin-top: -1.2rem; /* pull onto photo band */
+  margin-bottom: 2.25rem;
+}
+
+.vs-content h1 {
+  font-size: clamp(2rem, 2.6vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.vs-subtitle {
+  margin-top: 0.7rem;
+  font-size: 0.98rem;
+  color: var(--vs-text-muted);
+}
+
+/* CTA BUTTON */
+
+.vs-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.6rem;
+  padding: 0.8rem 2.6rem;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at top left,
+    #ffc56a 0,
+    #f2a53a 45%,
+    #d17c1f 100%
+  );
+  color: #251402;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+  transition: var(--vs-transition-fast);
+  cursor: pointer;
+}
+
+.vs-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  filter: brightness(1.05);
+}
+
+.vs-schools h2 {
+  position: relative;
+  text-align: center;
+  margin-top: -1.2rem; /* pull onto photo band */
+  margin-bottom: 2.25rem;
+}
+
+.vs-switch-banner {
+  background: rgba(255, 255, 255, 0.9);
+  color: #222;
+  padding: 12px 16px;
+  margin: 16px auto;
+  max-width: 520px;
+  text-align: center;
+  border-left: 4px solid #00bfa6;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* ===============================
+   SWITCH LOGIN SECTION
+   =============================== */
+
+.vs-switch-login {
+  background: rgba(255, 255, 255, 0.95);
+  max-width: 420px;
+  margin: 30px auto 0;
+  padding: 28px 26px;
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: fadeUp 0.4s ease;
+}
+
+.vs-switch-login h2 {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Form layout */
+.vs-switch-login form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Inputs & selects */
+.vs-switch-login input,
+.vs-switch-login select {
+  width: 100%;
+  padding: 11px 12px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  outline: none;
+  transition:
+    border 0.2s,
+    box-shadow 0.2s;
+}
+
+.vs-switch-login input[readonly] {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.vs-switch-login input:focus,
+.vs-switch-login select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Submit button */
+.vs-switch-login button {
+  margin-top: 6px;
+  padding: 12px;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.vs-switch-login button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35);
+}
+
+.vs-switch-login button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* QUICK LINKS */
+
+.vs-quick-links {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.vs-quick-card {
+  width: 280px;
+  max-width: 100%;
+  padding: 1.1rem 1.2rem 1rem;
+  border-radius: var(--vs-radius-lg);
+  background: radial-gradient(
+    circle at top,
+    #1f2434 0,
+    #10131f 60%,
+    #0a0c14 100%
+  );
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.65);
+  text-align: center;
+  text-decoration: none;
+  color: var(--vs-text);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: var(--vs-transition-fast);
+}
+
+.vs-quick-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
+  border-color: var(--vs-accent-soft);
+}
+
+.vs-quick-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(20, 23, 35, 0.9);
+  margin-bottom: 0.7rem;
+  position: relative;
+}
+
+.vs-quick-icon::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid rgba(242, 165, 58, 0.45);
+  opacity: 0;
+  transition: var(--vs-transition-fast);
+}
+
+.vs-quick-card:hover .vs-quick-icon::after {
+  opacity: 1;
+}
+
+.vs-quick-icon i {
+  font-size: 1.2rem;
+  color: var(--vs-accent);
+}
+
+.vs-quick-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* FOOTER */
+
+.vs-copyright {
+  position: relative;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+  .vs-hero {
+    padding: 2.4rem 1.6rem 2rem;
+  }
+
+  .vs-photo-band img {
+    height: 190px;
+  }
+
+  .vs-content {
+    margin-top: 1rem;
+  }
+
+  .vs-quick-card {
+    width: 100%;
+    max-width: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vs-main {
+    padding: 1rem;
+  }
+
+  .vs-photo-band {
+    margin: 1rem auto 2rem;
+  }
+
+  .vs-photo-band img {
+    height: 170px;
+  }
+
+  .vs-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .vs-subtitle {
+    font-size: 0.9rem;
+  }
+}
