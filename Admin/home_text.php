@@ -9,7 +9,7 @@ requireMenuAccess(MENU_ID);
 
 if (!can('view', MENU_ID)) {
     echo "<script>alert('You don\'t have permission to view home page text');
-        location.replace('/Victory/Admin/admin_dashboard.php')</script>";
+        location.replace('/Futuregen/Admin/admin_dashboard.php')</script>";
     exit;
 }
 
@@ -90,7 +90,7 @@ if (isset($_POST['reset'])) {
     <meta charset="UTF-8" />
     <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
 
     <!-- Bootstrap Links -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

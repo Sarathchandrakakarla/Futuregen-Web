@@ -16,7 +16,7 @@ error_reporting(0);
     <meta charset="UTF-8" />
     <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8/dist/sweetalert2.all.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <!-- Boxiocns CDN Link -->
@@ -368,7 +368,7 @@ error_reporting(0);
                                         alert("Subject Insertion Failed!")
                                     } else if (data == "permission") {
                                         alert('You don\'t have permission to insert into this report');
-                                        location.replace('/Victory/Admin/Marks/class_wise_subjects.php');
+                                        location.replace('/Futuregen/Admin/Marks/class_wise_subjects.php');
                                     } else {
                                         alert("Subject Added Successfully!")
                                         document.getElementById('tbody').innerHTML = data;

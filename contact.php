@@ -40,7 +40,7 @@ if (!isset($_SESSION['school_db'])) {
 <style>
   body {
     background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
-    height: 1800px;
+    height: 1300px;
     display: flex;
     flex-direction: column;
   }
@@ -240,7 +240,7 @@ if (!isset($_SESSION['school_db'])) {
       <img src="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/Victory Logo.png" alt="..." width="70px" />
     </div>
     <div class="heading">
-      <h3 style="<?php if($_SESSION['school_db']['school_code'] == 'FGS') echo 'font-size: medium;'; ?>"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></h3>
+      <h3><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></h3>
     </div>
     <input type="checkbox" id="click" />
     <label for="click" class="menu-btn">
@@ -290,30 +290,10 @@ if (!isset($_SESSION['school_db'])) {
       </div>
     </div>
   </div>
-  <div class="container con-2">
-    <div class="row m-2">
-      <div class="card" style="width: 19rem; height: 19rem">
-        <img src="Images/hm.jpg" class="card-img-top" alt="..." />
-        <div class="card-body">
-          <h4 class="card-title"><strong>Headmaster</strong></h4>
-          <h5 class="card-title">S. Mahammad Hussain</h5>
-          <p class="card-text"><b>Phone:</b> 9912652121</p>
-        </div>
-      </div>
-      <div class="card" style="width: 20rem; height: 19rem">
-        <img src="Images/Victory Logo.png" class="card-img-top" alt="..." />
-        <div class="card-body">
-          <h4 class="card-title"><strong>Admin Office</strong></h4>
-          <p class="card-text"><b>Phone:</b> 08566-244584</p>
-          <p class="card-text"><b>Mail:</b> victoryschoolskodur@gmail.com</p>
-        </div>
-      </div>
-    </div>
-  </div>
   <h2 id="reach_head">Reach Us</h2>
   <div class="map">
     <iframe
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3872.0684489486543!2d79.3506931!3d13.95453!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb2d363b864df29%3A0x7aabafc50b0bff98!2sVICTORY%20ENGLISH%20MEDIUM%20HIGH%20SCHOOL!5e0!3m2!1sen!2sin!4v1671534717624!5m2!1sen!2sin"
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d242.2269367908367!2d79.35767652260118!3d13.941774833169124!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb2d369fe7aeb93%3A0x14505e5d2c9d70c3!2sW9R5%2BP35%2C%20Koduru%2C%20Andhra%20Pradesh%20516101!5e0!3m2!1sen!2sin!4v1774897204465!5m2!1sen!2sin"
       width="600"
       height="450"
       style="border: 0"

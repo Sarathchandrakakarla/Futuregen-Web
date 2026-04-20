@@ -355,7 +355,7 @@ if (isset($_POST['Action'])) {
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
     <!-- Boxiocns CDN Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
     <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
@@ -653,7 +653,7 @@ if (isset($_POST['Action'])) {
                                             <span class="btn-wrapper ' . (!$canStats ? 'disabled-wrapper' : '') . '"
                                                 ' . (!$canStats ? 'title="You don\'t have permission to view analytics"' : '') . '>
                                                 <a href="' . ($canStats
-                                                ? '/Victory/Admin/Homework/homework_analytics.php?Action=show&Date=' . $date . '&Class=' . $class . '&Section=' . $section . '&Subject=' . $row1['Subjects']
+                                                ? '/Futuregen/Admin/Homework/homework_analytics.php?Action=show&Date=' . $date . '&Class=' . $class . '&Section=' . $section . '&Subject=' . $row1['Subjects']
                                                 : '#') . '"
                                                 target="_blank">
                                                     <button class="btn btn-primary" ' . (!$canStats ? 'onclick="return false;"' : '') . '>

@@ -9,7 +9,7 @@ requireMenuAccess(MENU_ID);
 
 if (!can('view', MENU_ID)) {
     echo "<script>alert('You don\'t have permission to view this report');
-        location.replace('/Victory/Admin/admin_dashboard.php')</script>";
+        location.replace('/Futuregen/Admin/admin_dashboard.php')</script>";
     exit;
 }
 
@@ -223,7 +223,7 @@ $roles = mysqli_query(
     <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
     <!-- Controlling Cache -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />

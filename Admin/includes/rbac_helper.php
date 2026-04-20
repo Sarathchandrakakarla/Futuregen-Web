@@ -12,7 +12,7 @@ function requireLogin()
     if (!isset($_SESSION['Admin_Id_No'])) {
         echo "<script>
             alert('Session Expired! Please Login Again!');
-            location.replace('/Victory/Admin/admin_login.php');
+            location.replace('/Futuregen/Admin/admin_login.php');
         </script>";
         exit;
     }
@@ -26,7 +26,7 @@ function requireMenuAccess(int $menuId)
     if (!isset($_SESSION['RBAC'][$menuId])) {
         echo "<script>
             alert('Access Denied!');
-            location.replace('/Victory/Admin/admin_dashboard.php');
+            location.replace('/Futuregen/Admin/admin_dashboard.php');
         </script>";
         exit;
     }

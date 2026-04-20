@@ -3,7 +3,7 @@ session_start();
 if (!$_SESSION['Admin_Id_No']) {
     echo "<script>
   alert('Admin Id Not Rendered');
-  location.replace('/Victory/Admin/admin_login.php');
+  location.replace('/Futuregen/Admin/admin_login.php');
   </script>
   </script>";
 }
@@ -15,8 +15,8 @@ if (!$_SESSION['Admin_Id_No']) {
     <meta charset="UTF-8" />
     <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
-    <link rel="stylesheet" href="/Victory/css/style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/style.css" />
 
     <!-- Boxiocns CDN Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />

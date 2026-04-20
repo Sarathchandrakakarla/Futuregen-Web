@@ -1,5 +1,5 @@
 <?php
-include $_SERVER['DOCUMENT_ROOT'] . '/Victory/link.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/Futuregen/link.php';
 
 if (!isset($_SESSION['RBAC'])) {
     $_SESSION['RBAC'] = [];
@@ -54,10 +54,10 @@ while ($menu_row = mysqli_fetch_assoc($menu_query)) {
         <li>
             <a href="#"><?php echo $_SESSION['Id_No'] . '(' . $_SESSION['Role_Name'] . ')' ?></a>
             <ul class="login-sub-menu sub-menu">
-                <li><a href="/Victory/php/logout.php">Sign Out</a></li>
+                <li><a href="/Futuregen/php/logout.php">Sign Out</a></li>
             </ul>
         </li>
-        <li id="sign-out"><a href="/Victory/php/logout.php">Sign Out</a></li>
+        <li id="sign-out"><a href="/Futuregen/php/logout.php">Sign Out</a></li>
     </ul>
 </nav>
 <div class="sidebar close">
@@ -131,4 +131,4 @@ while ($menu_row = mysqli_fetch_assoc($menu_query)) {
         <?php endforeach; ?>
     </ul>
 </div>
-<script src="/Victory/js/script.js"></script>
+<script src="/Futuregen/js/script.js"></script>

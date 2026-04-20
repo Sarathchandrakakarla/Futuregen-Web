@@ -15,7 +15,7 @@ if (!can('view', MENU_ID)) {
 if (!$_SESSION['Stu_Id_No']) {
   echo "<script>
   alert('Student Id Not Rendered');
-  location.replace('/Victory/Admin/Student/show_student_page.php');
+  location.replace('/Futuregen/Admin/Student/show_student_page.php');
   </script>";
 }
 error_reporting(0);
@@ -27,7 +27,7 @@ error_reporting(0);
   <meta charset="UTF-8" />
   <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
   <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+  <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
   <!-- Controlling Cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -84,11 +84,11 @@ error_reporting(0);
           <?php
           if (file_exists("../../Images/stu_img/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
           ?>
-            <td rowspan="3" colspan="2" align="center"><img src="/Victory/Images/stu_img/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Student Image" width="100px"></td>
+            <td rowspan="3" colspan="2" align="center"><img src="/Futuregen/Images/stu_img/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Student Image" width="100px"></td>
           <?php
           } else {
           ?>
-            <td rowspan="3" colspan="2" align="center"><img src="/Victory/Images/stu_img/not_photo.jpg" alt="Student Image" width="100px"></td>
+            <td rowspan="3" colspan="2" align="center"><img src="/Futuregen/Images/stu_img/not_photo.jpg" alt="Student Image" width="100px"></td>
           <?php
           }
           ?>
@@ -108,11 +108,11 @@ error_reporting(0);
             <?php
             if (file_exists("../../Images/parent_img_male/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
             ?>
-              <img src="/Victory/Images/parent_img_male/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Father Image" width="100px">
+              <img src="/Futuregen/Images/parent_img_male/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Father Image" width="100px">
             <?php
             } else {
             ?>
-              <img src="/Victory/Images/parent_img_male/not_photo.jpg" alt="Father Image" width="100px">
+              <img src="/Futuregen/Images/parent_img_male/not_photo.jpg" alt="Father Image" width="100px">
             <?php
             }
             ?>
@@ -121,11 +121,11 @@ error_reporting(0);
             <?php
             if (file_exists("../../Images/parent_img_female/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
             ?>
-              <img src="/Victory/Images/parent_img_female/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Mother Image" width="100px">
+              <img src="/Futuregen/Images/parent_img_female/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Mother Image" width="100px">
             <?php
             } else {
             ?>
-              <img src="/Victory/Images/parent_img_female/not_photo.jpg" alt="Mother Image" width="100px">
+              <img src="/Futuregen/Images/parent_img_female/not_photo.jpg" alt="Mother Image" width="100px">
             <?php
             }
             ?>

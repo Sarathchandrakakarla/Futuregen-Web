@@ -27,5 +27,5 @@ session_regenerate_id(true);
 /**
  * Redirect to switch gateway
  */
-header("Location: /Victory/Welcome/preindex.php?switch=1");
+header("Location: /Futuregen/Welcome/preindex.php?switch=1");
 exit;

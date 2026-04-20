@@ -360,7 +360,7 @@ if ($totalPages <= 2) {
       <img src="../Images/Victory Logo.png" alt="..." width="70px" />
     </div>
     <div class="heading">
-      <h3>Victory Schools, Kodur</h3>
+      <h3>Futuregen Schools, Kodur</h3>
     </div>
     <input type="checkbox" id="click" />
     <label for="click" class="menu-btn">
@@ -401,7 +401,7 @@ if ($totalPages <= 2) {
       echo "<div class='tip-box text-center'>\"" . $row['tip_text'] . "\"</div>";
       ?>
     </div>
-    <h3 class="text-center">Engage in Events and Activities from Victory Schools</h3>
+    <h3 class="text-center">Engage in Events and Activities from Futuregen Schools</h3>
     <h5 class="text-center mt-4">Posts From the School Desk</h5>
     <div class="cards-container">
       <!-- Blog Grid -->
@@ -472,7 +472,7 @@ if ($totalPages <= 2) {
 
   <footer class="bg-dark text-light py-3 mt-5">
     <div class="container text-center">
-      <p class="mb-1">&copy; <?php echo date('Y'); ?> Victory Schools, Kodur. All Rights Reserved.</p>
+      <p class="mb-1">&copy; <?php echo date('Y'); ?> Futuregen Schools, Kodur. All Rights Reserved.</p>
       <small>
         Developed by
         <a href="https://sarathtechgenics.netlify.app" target="_blank" class="text-info">Sarath Techgenics</a>

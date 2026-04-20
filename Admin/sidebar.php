@@ -1,5 +1,5 @@
 <?php
-include $_SERVER['DOCUMENT_ROOT'] . '/Victory/link.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/Futuregen/link.php';
 
 $showSwitchSchool = false;
 
@@ -89,10 +89,10 @@ while ($menu_row = mysqli_fetch_assoc($menu_query)) {
                         </a>
                     </li>
                 <?php endif; ?>
-                <li><a href="/Victory/php/logout.php">Sign Out</a></li>
+                <li><a href="/Futuregen/php/logout.php">Sign Out</a></li>
             </ul>
         </li>
-        <li id="sign-out"><a href="/Victory/php/logout.php">Sign Out</a></li>
+        <li id="sign-out"><a href="/Futuregen/php/logout.php">Sign Out</a></li>
     </ul>
 </nav>
 <div class="sidebar close">
@@ -192,7 +192,7 @@ while ($menu_row = mysqli_fetch_assoc($menu_query)) {
     }
 
     function confirmSwitchSchool() {
-        window.location.href = '/Victory/Admin/switch_school.php';
+        window.location.href = '/Futuregen/Admin/switch_school.php';
     }
     // Optional: close on ESC
     document.addEventListener('keydown', function(e) {
@@ -200,4 +200,4 @@ while ($menu_row = mysqli_fetch_assoc($menu_query)) {
     });
 </script>
 
-<script src="/Victory/js/script.js"></script>
+<script src="/Futuregen/js/script.js"></script>

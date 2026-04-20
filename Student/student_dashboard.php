@@ -110,11 +110,11 @@ if (!$_SESSION['Id_No']) {
   <?php include 'sidebar.php'; ?>
 
   <div class="container img-container" data-aos="fade-in">
-    <img src="/Victory/Images/Victory Logo.png" alt="Logo" width="200px">
+    <img src="/Futuregen/Images/Victory Logo.png" alt="Logo" width="200px">
   </div>
   <div class="container type-container">
     <div class="head">
-      <p id="vic_heading"><b style="padding-right: 30px;font-family: 'algerian';">Victory</b></p>
+      <p id="vic_heading"><b style="padding-right: 30px;font-family: 'algerian';">Futuregen</b></p>
     </div>
     <div class="wrapper">
       <div class="typing-demo">

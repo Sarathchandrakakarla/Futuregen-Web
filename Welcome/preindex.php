@@ -1,8 +1,8 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/Victory/db_router.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Futuregen/db_router.php';
 $isSwitch = isset($_GET['switch']) && $_GET['switch'] == 1;
 if ($isSwitch && !isset($_SESSION['switch_context'])) {
-  header('Location: /Victory/Welcome/preindex.php');
+  header('Location: /Futuregen/Welcome/preindex.php');
   exit;
 }
 
@@ -31,7 +31,7 @@ $q = mysqli_query(
         Root_Dir
      FROM school_master
      WHERE active_flag = 1
-     and parent_org = 'Victory'
+     and school_code = 'FGS'
      ORDER BY school_id"
 );
 
@@ -49,21 +49,21 @@ while ($row = mysqli_fetch_assoc($q)) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="An Official Web Portal For Victory Schools, Kodur." />
-  <title>Victory Schools Portal</title>
+    content="An Official Web Portal For Futuregen Schools, Kodur." />
+  <title>Futuregen Schools Portal</title>
 
   <link
     rel="shortcut icon"
-    href="/Victory/Images/favicon.ico"
+    href="/Futuregen/Images/favicon.ico"
     type="image/x-icon" />
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" />
 
   <!-- icon-link -->
-  <link rel="stylesheet" href="/Victory/Welcome/line-awesome.min.css" />
+  <link rel="stylesheet" href="/Futuregen/Welcome/line-awesome.min.css" />
   <!-- style-link -->
-  <link rel="stylesheet" href="/Victory/Welcome/new_style.css" />
+  <link rel="stylesheet" href="/Futuregen/Welcome/new_style.css" />
 </head>
 
 <body>
@@ -77,7 +77,7 @@ while ($row = mysqli_fetch_assoc($q)) {
     <section class="vs-switch-login">
       <h2>Re-Login to Continue</h2>
 
-      <form method="post" action="/Victory/Welcome/switch_auth.php">
+      <form method="post" action="/Futuregen/Welcome/switch_auth.php">
         <!-- Username (read-only) -->
         <input type="text"
           value="<?= htmlspecialchars($_SESSION['switch_context']['username']) ?>"
@@ -124,15 +124,15 @@ while ($row = mysqli_fetch_assoc($q)) {
     <!-- logo -->
     <div class="vs-logo-wrap">
       <img
-        src="/Victory/Images/Victory Logo.png"
+        src="/Futuregen/Images/Victory Logo.png"
         class="vs-logo"
-        alt="Victory School"
-        title="Victory School" />
+        alt="Futuregen School"
+        title="Futuregen School" />
     </div>
 
     <!-- text + CTA -->
     <section class="vs-content">
-      <h1>Welcome to Victory Schools Portal</h1>
+      <h1>Welcome to Futuregen Schools Portal</h1>
       <p class="vs-subtitle">
         Pioneering holistic education for young minds.
       </p>
@@ -146,7 +146,7 @@ while ($row = mysqli_fetch_assoc($q)) {
           <?php foreach ($schools as $s): ?>
             <form
               method="post"
-              action="/Victory/index.php"
+              action="/Futuregen/index.php"
               class="vs-quick-card">
               <input
                 type="hidden"
@@ -194,7 +194,7 @@ while ($row = mysqli_fetch_assoc($q)) {
 
     <!-- footer -->
     <p class="vs-copyright">
-      © <span id="year"></span>, Victory Educational Society. All rights
+      © <span id="year"></span>, Futuregen Educational Society. All rights
       reserved.
     </p>
   </div>

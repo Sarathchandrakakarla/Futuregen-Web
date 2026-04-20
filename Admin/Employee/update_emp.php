@@ -16,7 +16,7 @@ if (!$_SESSION['Emp_Id']) {
 
 if (!can('update', MENU_ID)) {
   echo "<script>alert('You don\'t have permission to update employee data');
-    location.replace('/Victory/Admin/Student/show_emp_page.php')</script>";
+    location.replace('/Futuregen/Admin/Student/show_emp_page.php')</script>";
   exit;
 }
 error_reporting(0);
@@ -108,8 +108,8 @@ if (isset($_POST["update"])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
   <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
-  <link rel="stylesheet" href="/Victory/css/form-style.css" />
+  <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
+  <link rel="stylesheet" href="/Futuregen/css/form-style.css" />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <!-- Boxiocns CDN Link -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />

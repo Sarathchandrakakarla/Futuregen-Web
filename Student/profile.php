@@ -9,7 +9,7 @@ requireMenuAccess(MENU_ID);
 if (!can('view', MENU_ID)) {
   echo "<script>
   alert('You don\'t have permission to view your profile! Please Contact School Office');
-  location.replace('/Victory/Student/student_dashboard.php');
+  location.replace('/Futuregen/Student/student_dashboard.php');
   </script>";
 }
 error_reporting(0);
@@ -21,7 +21,7 @@ error_reporting(0);
   <meta charset="UTF-8" />
   <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
   <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+  <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
   <!-- Controlling Cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -66,7 +66,7 @@ error_reporting(0);
         <tr>
           <th class="bg-secondary text-light">Id No.</th>
           <td width="100%"><?php echo $_SESSION['Id_No']; ?></td>
-          <td rowspan="3" colspan="2" style="background-color: rgb(226,226,226);"><img src="/Victory/Images/stu_img/<?php echo $_SESSION['Id_No'] . ".jpg" ?>" alt="Student Image" width="100px"></td>
+          <td rowspan="3" colspan="2" style="background-color: rgb(226,226,226);"><img src="/Futuregen/Images/stu_img/<?php echo $_SESSION['Id_No'] . ".jpg" ?>" alt="Student Image" width="100px"></td>
         </tr>
         <tr>
           <th class="bg-secondary text-light">Admission No.</th>
@@ -79,8 +79,8 @@ error_reporting(0);
         <tr>
           <th class="bg-secondary text-light">Surname</th>
           <td><?php echo $_SESSION['Sur_Name']; ?></td>
-          <td rowspan="3"><img src="/Victory/Images/parent_img_male/<?php echo $_SESSION['Id_No'] . ".jpg" ?>" alt="Father Image" width="100px"></td>
-          <td rowspan="3"><img src="/Victory/Images/parent_img_female/<?php echo $_SESSION['Id_No'] . ".jpg" ?>" alt="Mother Image" width="100px"></td>
+          <td rowspan="3"><img src="/Futuregen/Images/parent_img_male/<?php echo $_SESSION['Id_No'] . ".jpg" ?>" alt="Father Image" width="100px"></td>
+          <td rowspan="3"><img src="/Futuregen/Images/parent_img_female/<?php echo $_SESSION['Id_No'] . ".jpg" ?>" alt="Mother Image" width="100px"></td>
         </tr>
         <tr>
           <th class="bg-secondary text-light">Father Name</th>

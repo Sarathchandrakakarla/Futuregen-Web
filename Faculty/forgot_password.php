@@ -146,7 +146,7 @@ if (isset($_POST['Verify'])) {
                 <img src="../Images/Victory Logo.png" alt="..." width="70px">
             </div>
             <div class="heading">
-                <h3>Victory Schools, Kodur</h3>
+                <h3>Futuregen School, Kodur</h3>
             </div>
             <input type="checkbox" id="click" />
             <label for="click" class="menu-btn">

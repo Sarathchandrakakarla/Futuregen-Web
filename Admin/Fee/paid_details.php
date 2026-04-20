@@ -17,7 +17,7 @@ error_reporting(0);
     <meta charset="UTF-8" />
     <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
     <!-- Boxiocns CDN Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
     <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
@@ -392,7 +392,7 @@ error_reporting(0);
     <!-- Print Table -->
     <script type="text/javascript">
         function printDiv() {
-            window.frames["print_frame"].document.body.innerHTML = "<div class='container' style='display:flex;margin-left:30px;'><img src='/Victory/Images/Victory Logo.png' alt='...' width='80px'><h2 style='margin-left:110px;'><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></h2></div>";
+            window.frames["print_frame"].document.body.innerHTML = "<div class='container' style='display:flex;margin-left:30px;'><img src='/Futuregen/Images/Victory Logo.png' alt='...' width='80px'><h2 style='margin-left:110px;'><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></h2></div>";
             window.frames["print_frame"].document.body.innerHTML += "<h2 style='text-align:center;'>Student Fee Details</h2>";
             window.frames["print_frame"].document.body.innerHTML += document.querySelector('.table-container').innerHTML;
             window.frames["print_frame"].document.querySelectorAll('.action').forEach((ele) => {

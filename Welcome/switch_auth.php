@@ -1,12 +1,12 @@
 <?php
 session_start();
-require_once $_SERVER['DOCUMENT_ROOT'] . '/Victory/db_router.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Futuregen/db_router.php';
 
 /* ==============================
    SWITCH CONTEXT CHECK
    ============================== */
 if (!isset($_SESSION['switch_context'])) {
-    header('Location: /Victory/Welcome/preindex.php');
+    header('Location: /Futuregen/Welcome/preindex.php');
     exit;
 }
 
@@ -71,7 +71,7 @@ if ($loginType === 'Admin') {
 
     loadRBAC($link, (int)$row['Role']);
 
-    header("Location: /Victory/Admin/admin_dashboard.php");
+    header("Location: /Futuregen/Admin/admin_dashboard.php");
     exit;
 }
 
@@ -118,7 +118,7 @@ if ($loginType === 'Faculty') {
 
     loadRBAC($link, (int)$row['Role']);
 
-    header("Location: /Victory/Faculty/faculty_dashboard.php");
+    header("Location: /Futuregen/Faculty/faculty_dashboard.php");
     exit;
 }
 
@@ -174,7 +174,7 @@ if ($loginType === 'Student') {
         }
     }
 
-    header("Location: /Victory/Student/student_dashboard.php");
+    header("Location: /Futuregen/Student/student_dashboard.php");
     exit;
 }
 

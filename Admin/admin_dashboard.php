@@ -3,7 +3,7 @@ session_start();
 if (!$_SESSION['Admin_Id_No']) {
     echo "<script>
   alert('Session Expired!Please Login Again!');
-  location.replace('/Victory/Admin/admin_login.php');
+  location.replace('/Futuregen/Admin/admin_login.php');
   </script>
   </script>";
 }
@@ -15,7 +15,7 @@ if (!$_SESSION['Admin_Id_No']) {
     <meta charset="UTF-8" />
     <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
     <!-- Controlling Cache -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -154,7 +154,7 @@ if (!$_SESSION['Admin_Id_No']) {
     </div>
     <div class="container type-container">
         <div class="head">
-            <p id="vic_heading"><b style="padding-right: 30px;font-family: 'algerian';">Victory</b></p>
+            <p id="vic_heading"><b style="padding-right: 30px;font-family: 'algerian';">Futuregen</b></p>
         </div>
         <div class="wrapper">
             <div class="typing-demo">

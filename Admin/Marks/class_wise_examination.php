@@ -16,7 +16,7 @@ error_reporting(0);
   <meta charset="UTF-8" />
   <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
   <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+  <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8/dist/sweetalert2.all.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <!-- Boxiocns CDN Link -->

@@ -12,7 +12,7 @@ function requireLogin()
     if (!isset($_SESSION['Id_No'])) {
         echo "<script>
             alert('Session Expired! Please Login Again!');
-            location.replace('/Victory/Faculty/faculty_login.php');
+            location.replace('/Futuregen/Faculty/faculty_login.php');
         </script>";
         exit;
     }
@@ -26,7 +26,7 @@ function requireMenuAccess(int $menuId)
     if (!isset($_SESSION['RBAC'][$menuId])) {
         echo "<script>
             alert('Access Denied!');
-            location.replace('/Victory/Admin/faculty_dashboard.php');
+            location.replace('/Futuregen/Admin/faculty_dashboard.php');
         </script>";
         exit;
     }

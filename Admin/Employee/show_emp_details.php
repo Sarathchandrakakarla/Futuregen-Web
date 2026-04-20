@@ -29,7 +29,7 @@ error_reporting(0);
   <meta charset="UTF-8" />
   <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
   <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+  <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
   <!-- Controlling Cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -79,11 +79,11 @@ error_reporting(0);
           <?php
           if (file_exists("../../Images/emp_img/" . $_SESSION['Emp_Id_No'] . ".jpg")) {
           ?>
-            <td rowspan="4"><img src="/Victory/Images/emp_img/<?php echo $_SESSION['Emp_Id_No'] . ".jpg" ?>" alt="Employee Image" width="100px"></td>
+            <td rowspan="4"><img src="/Futuregen/Images/emp_img/<?php echo $_SESSION['Emp_Id_No'] . ".jpg" ?>" alt="Employee Image" width="100px"></td>
           <?php
           } else {
           ?>
-            <td rowspan="3" colspan="2" align="center"><img src="/Victory/Images/emp_img/not_photo.jpg" alt="Employee Image" width="100px"></td>
+            <td rowspan="3" colspan="2" align="center"><img src="/Futuregen/Images/emp_img/not_photo.jpg" alt="Employee Image" width="100px"></td>
           <?php
           }
           ?>

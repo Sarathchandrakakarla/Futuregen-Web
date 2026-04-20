@@ -9,7 +9,7 @@ requireMenuAccess(MENU_ID);
 
 if (!can('view', MENU_ID)) {
     echo "<script>alert('You don\'t have permission to view this report');
-        location.replace('/Victory/Faculty/faculty_dashboard.php')</script>";
+        location.replace('/Futuregen/Faculty/faculty_dashboard.php')</script>";
     exit;
 }
 

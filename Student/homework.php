@@ -129,7 +129,7 @@ error_reporting(0);
                                 <td>" . $i . "</td>
                                 <td>" . $row1['Subject'] . "</td>
                                 <td style='display:flex;gap:50px;'>";
-                            echo "<a href='/Victory/Files/Homework/" . $row1['Class'] . " " . $row1['Section'] . "/" . $row1['Date'] . "/" . $row1['Subject'] . ".pdf' download>Download File</a>";
+                            echo "<a href='/Futuregen/Files/Homework/" . $row1['Class'] . " " . $row1['Section'] . "/" . $row1['Date'] . "/" . $row1['Subject'] . ".pdf' download>Download File</a>";
                             echo "</td>
                             </tr>
                             ";

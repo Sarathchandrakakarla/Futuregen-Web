@@ -9,7 +9,7 @@ requireMenuAccess(MENU_ID);
 if (!can('view', MENU_ID)) {
     echo "<script>
   alert('You don\'t have permission to view your attendance! Please Contact School Office');
-  location.replace('/Victory/Student/student_dashboard.php');
+  location.replace('/Futuregen/Student/student_dashboard.php');
   </script>";
 }
 error_reporting(0);

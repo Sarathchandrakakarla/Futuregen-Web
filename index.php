@@ -53,17 +53,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['school_code'])) {
     ];
     switch ($_SESSION['school_db']['school_code']) {
       case 'VHS':
-        $_SESSION['school_db']['footer_msg'] = "Victory Educational Society";
+        $_SESSION['school_db']['footer_msg'] = "Futuregen Educational Society";
         break;
       case 'FGS':
         $_SESSION['school_db']['footer_msg'] = "Futuregen International School";
         break;
     }
-    header("Location: /Victory/index.php", true, 303);
+    header("Location: /Futuregen/index.php", true, 303);
     exit;
   } else {
     unset($_SESSION['school_db']);
-    header('Location: /Victory/Welcome/preindex.php');
+    header('Location: /Futuregen/Welcome/preindex.php');
     exit;
   }
 }
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['school_code'])) {
  * STEP 2: Enforce school selection
  */
 if (!isset($_SESSION['school_db'])) {
-  header('Location: /Victory/Welcome/preindex.php');
+  header('Location: /Futuregen/Welcome/preindex.php');
   exit;
 }
 
@@ -433,18 +433,18 @@ if (filesize($rootDir . "/test.txt") != 0) {
       <i class="fas fa-bars"></i>
     </label>
     <ul>
-      <li><a class="active" href="/Victory/index.php">Home</a></li>
+      <li><a class="active" href="/Futuregen/index.php">Home</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
-      <li><a href="/Victory/Gallery/gallery.php">Gallery</a></li>
+      <li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
-      <li><a href="/Victory/youtube.php" id="link">Our Stories</a></li>
-      <li><a href="/Victory/blog/blog_index.php" id="link">Our Blog</a></li>
+      <li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
+      <li><a href="/Futuregen/blog/blog_index.php" id="link">Our Blog</a></li>
       <li>
         <a href="#">Login</a>
         <ul class="login-sub-menu sub-menu">
-          <li><a href="/Victory/Admin/admin_login.php">Admin Login</a></li>
-          <li><a href="/Victory/Student/student_login.php">Student Login</a></li>
-          <li><a href="/Victory/Faculty/faculty_login.php">Faculty Login</a></li>
+          <li><a href="/Futuregen/Admin/admin_login.php">Admin Login</a></li>
+          <li><a href="/Futuregen/Student/student_login.php">Student Login</a></li>
+          <li><a href="/Futuregen/Faculty/faculty_login.php">Faculty Login</a></li>
         </ul>
       </li>
     </ul>
@@ -452,7 +452,7 @@ if (filesize($rootDir . "/test.txt") != 0) {
   <?php if (isset($_SESSION['Text'])) { ?>
     <div class="container-fluid marquee-container">
       <marquee width="100%" behavior="alternate" scrollamount="12">
-        <img src="/Victory/Images/new.png" alt="..." class="icon" width="50px" />
+        <img src="/Futuregen/Images/new.png" alt="..." class="icon" width="50px" />
         <b style="font-family: 'Times New Roman'" id="marquee-text"><?php if (isset($_SESSION['Text'])) {
                                                                       echo $_SESSION['Text'];
                                                                     } ?></b>
@@ -504,11 +504,11 @@ if (filesize($rootDir . "/test.txt") != 0) {
     <div class="play-div p-2">
       <div class="row justify-content-center">
         <div class="col-lg-4 mt-4" id="play-text">
-          <p><b>Download Android App of our Victory School</b></p>
+          <p><b>Download Android App of our Futuregen School</b></p>
         </div>
         <div class="col-lg-4">
           <a href="https://play.google.com/store/apps/details?id=com.victoryschools" target="_blank" id="play-icon">
-            <img src="/Victory/Images/GooglePlay.png" alt="..." width="50%">
+            <img src="/Futuregen/Images/GooglePlay.png" alt="..." width="50%">
           </a>
         </div>
       </div>

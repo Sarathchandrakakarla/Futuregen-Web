@@ -9,7 +9,7 @@ requireMenuAccess(MENU_ID);
 
 if (!can('view', MENU_ID)) {
     echo "<script>alert('You don\'t have permission to view blog requests');
-      location.replace('/Victory/Admin/admin_dashboard.php')</script>";
+      location.replace('/Futuregen/Admin/admin_dashboard.php')</script>";
     exit;
 }
 
@@ -394,7 +394,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon" />
 
     <!-- CSS and JS -->
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
     <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />

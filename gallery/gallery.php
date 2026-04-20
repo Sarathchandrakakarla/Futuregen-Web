@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['school_db'])) {
-  header('Location: /Victory/Welcome/preindex.php');
+  header('Location: /Futuregen/Welcome/preindex.php');
   exit;
 }
 ?>
@@ -335,18 +335,18 @@ if (!isset($_SESSION['school_db'])) {
       <i class="fas fa-bars"></i>
     </label>
     <ul>
-      <li><a href="/Victory/index.php">Home</a></li>
+      <li><a href="/Futuregen/index.php">Home</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
-      <li><a class="active" href="/Victory/Gallery/gallery.php">Gallery</a></li>
+      <li><a class="active" href="/Futuregen/Gallery/gallery.php">Gallery</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
-      <li><a href="/Victory/youtube.php" id="link">Our Stories</a></li>
-      <li><a href="/Victory/blog/blog_index.php" id="link">Our Blog</a></li>
+      <li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
+      <li><a href="/Futuregen/blog/blog_index.php" id="link">Our Blog</a></li>
       <li>
         <a href="#">Login</a>
         <ul class="login-sub-menu sub-menu">
-          <li><a href="/Victory/Admin/admin_login.php">Admin Login</a></li>
-          <li><a href="/Victory/Student/student_login.php">Student Login</a></li>
-          <li><a href="/Victory/Faculty/faculty_login.php">Faculty Login</a></li>
+          <li><a href="/Futuregen/Admin/admin_login.php">Admin Login</a></li>
+          <li><a href="/Futuregen/Student/student_login.php">Student Login</a></li>
+          <li><a href="/Futuregen/Faculty/faculty_login.php">Faculty Login</a></li>
         </ul>
       </li>
     </ul>

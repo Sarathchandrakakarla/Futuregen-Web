@@ -192,8 +192,8 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Application') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></title>
     <link rel="shortcut icon" href="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/Victory/css/sidebar-style.css" />
-    <link rel="stylesheet" href="/Victory/css/form-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/sidebar-style.css" />
+    <link rel="stylesheet" href="/Futuregen/css/form-style.css" />
     <!-- Boxiocns CDN Link -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
@@ -708,7 +708,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Application') {
                         <div class="input-box" id="qr_image_box" style="display:none;">
                             <span class="details">UPI QR</span>
                             <img
-                                src="https://victoryschools.in/Victory/App%20Files/Images/Victory%20Edu%20Society%20QR.jpg"
+                                src="https://victoryschools.in/Futuregen/App%20Files/Images/Victory%20Edu%20Society%20QR.jpg"
                                 alt="Victory Edu Society QR"
                                 style="max-width:100%; width:220px; border-radius:8px; border:1px solid #dbe4ee; padding:6px; background:#fff;">
                         </div>
@@ -1302,7 +1302,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Application') {
 
         function shareApplication(branch, appNo) {
 
-            let url = `https://victoryschools.in/Victory/Files/Applications/${branch}/Application_${appNo}.pdf`;
+            let url = `https://victoryschools.in/Futuregen/Files/Applications/${branch}/Application_${appNo}.pdf`;
 
             window.open(url, "_blank");
         }
