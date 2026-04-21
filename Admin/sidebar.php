@@ -24,7 +24,7 @@ if (!empty($_SESSION['school_db']['parent_org'])) {
         mysqli_stmt_close($stmt);
 
         if ($schoolCount > 1) {
-            $showSwitchSchool = true;
+            //$showSwitchSchool = true;
         }
     }
 }
@@ -165,7 +165,7 @@ while ($menu_row = mysqli_fetch_assoc($menu_query)) {
     </ul>
 </div>
 
-<div id="switchSchoolModal" class="modal" role="dialog">
+<!-- <div id="switchSchoolModal" class="modal" role="dialog">
     <div class="modal-content switch-modal-content">
         <h3>Switch School</h3>
         <p>
@@ -178,7 +178,7 @@ while ($menu_row = mysqli_fetch_assoc($menu_query)) {
             <button class="danger" onclick="confirmSwitchSchool()">Continue</button>
         </div>
     </div>
-</div>
+</div> -->
 
 <script>
     function openSwitchSchoolModal() {

@@ -53,10 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['school_code'])) {
     ];
     switch ($_SESSION['school_db']['school_code']) {
       case 'VHS':
-        $_SESSION['school_db']['footer_msg'] = "Futuregen Educational Society";
+        $_SESSION['school_db']['footer_msg'] = "Victory Educational Society";
         break;
       case 'FGS':
-        $_SESSION['school_db']['footer_msg'] = "Futuregen International School";
+        $_SESSION['school_db']['footer_msg'] = "Futuregen EM High School";
         break;
     }
     header("Location: /Futuregen/index.php", true, 303);
@@ -435,10 +435,10 @@ if (filesize($rootDir . "/test.txt") != 0) {
     <ul>
       <li><a class="active" href="/Futuregen/index.php">Home</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
-      <li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>
+      <!--<li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>-->
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
-      <li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
-      <li><a href="/Futuregen/blog/blog_index.php" id="link">Our Blog</a></li>
+      <!--<li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
+      <li><a href="/Futuregen/blog/blog_index.php" id="link">Our Blog</a></li>-->
       <li>
         <a href="#">Login</a>
         <ul class="login-sub-menu sub-menu">

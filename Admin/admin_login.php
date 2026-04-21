@@ -157,10 +157,10 @@ if (isset($_POST['Login'])) {
         <ul>
             <li><a href="/Futuregen/index.php">Home</a></li>
             <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
-            <li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>
+            <!-- <li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li> -->
             <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
-            <li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
-            <li><a href="/Futuregen/blog/blog_index.php" id="link">Blog</a></li>
+            <!-- <li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
+            <li><a href="/Futuregen/blog/blog_index.php" id="link">Blog</a></li> -->
             <li>
                 <a class="active" href="#">Login</a>
                 <ul class="login-sub-menu sub-menu">

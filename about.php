@@ -365,18 +365,18 @@ if (!isset($_SESSION['school_db'])) {
       <i class="fas fa-bars"></i>
     </label>
     <ul>
-      <li><a href="/Victory/index.php">Home</a></li>
+      <li><a href="/Futuregen/index.php">Home</a></li>
       <li><a class="active" href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
-      <li><a href="/Victory/Gallery/gallery.php">Gallery</a></li>
+      <!--<li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>-->
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
-      <li><a href="/Victory/youtube.php" id="link">Our Stories</a></li>
-      <li><a href="/Victory/blog/blog_index.php" id="link">Our Blog</a></li>
+      <!--<li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
+      <li><a href="/Futuregen/blog/blog_index.php" id="link">Our Blog</a></li>-->
       <li>
         <a href="#">Login</a>
         <ul class="login-sub-menu sub-menu">
-          <li><a href="/Victory/Admin/admin_login.php">Admin Login</a></li>
-          <li><a href="/Victory/Student/student_login.php">Student Login</a></li>
-          <li><a href="/Victory/Faculty/faculty_login.php">Faculty Login</a></li>
+          <li><a href="/Futuregen/Admin/admin_login.php">Admin Login</a></li>
+          <li><a href="/Futuregen/Student/student_login.php">Student Login</a></li>
+          <li><a href="/Futuregen/Faculty/faculty_login.php">Faculty Login</a></li>
         </ul>
       </li>
     </ul>
@@ -406,7 +406,7 @@ if (!isset($_SESSION['school_db'])) {
         </div>
         <div class="col-lg-6">
           <p id="about_school">
-            Victory's Futuregen International School is an initiative of Victory Schools, carrying forward a legacy of excellence in education. We are committed to providing a perfect blend of academics, technology, and values to prepare students for a rapidly changing world.
+            Victory's Futuregen EM High School is an initiative of Victory Schools, carrying forward a legacy of excellence in education. We are committed to providing a perfect blend of academics, technology, and values to prepare students for a rapidly changing world.
           </p>
         </div>
       </div>
@@ -414,7 +414,7 @@ if (!isset($_SESSION['school_db'])) {
 
     <!-- Management Section -->
     <h1 id="school_head" data-aos="fade-up">
-      The <span style="font-family: 'Libre Baskerville', serif;font-style:italic;">"Victory"</span> Management
+      The <span style="font-family: 'Libre Baskerville', serif;font-style:italic;">"Futuregen"</span> Management
     </h1>
 
     <div class="container" align="center">
@@ -445,11 +445,11 @@ if (!isset($_SESSION['school_db'])) {
 
     <div class="container about_management" data-aos="fade-up">
       <p id="about_school">
-        Victory's Futuregen International School stands as a testament to visionary leadership under the guidance of Principal K. Ramakrishna Reddy and Correspondent A. Narasimha Reddy. Their unwavering commitment to excellence in education continues to shape an institution that nurtures both academic achievement and holistic development.<br><br>
+        Victory's Futuregen EM High School stands as a testament to visionary leadership under the guidance of Principal K. Ramakrishna Reddy and Correspondent A. Narasimha Reddy. Their unwavering commitment to excellence in education continues to shape an institution that nurtures both academic achievement and holistic development.<br><br>
 
         With their combined expertise, experience, and dedication, they foster a dynamic and inspiring learning environment where students are encouraged to explore their potential, develop essential life skills, and grow into confident, future-ready individuals. Their leadership not only motivates our students but also empowers our faculty to deliver meaningful and impactful education.<br><br>
 
-        At Victory's Futuregen International School, we are proud to cultivate a culture of innovation, integrity, and excellence—preparing our learners to succeed in an ever-evolving world.<br><br>
+        At Victory's Futuregen EM High School, we are proud to cultivate a culture of innovation, integrity, and excellence—preparing our learners to succeed in an ever-evolving world.<br><br>
 
         Join us and become a part of an inspiring educational journey toward a brighter future.
       </p>
@@ -465,8 +465,8 @@ if (!isset($_SESSION['school_db'])) {
         <h4>Our Vision</h4>
         To nurture confident, responsible, and innovative global citizens who are equipped with the knowledge, skills, and values needed to thrive in an ever-changing world. We aspire to create lifelong learners who think independently, act ethically, and contribute meaningfully to society.<br><br>
         <h4>Our Mission</h4><br>
-        <h5>🎓Deliver High-Quality CBSE Education</h5>
-        We are committed to providing a strong academic foundation through the CBSE curriculum, enriched with modern teaching methodologies, technology integration, and a focus on conceptual understanding that prepares students for academic excellence and future challenges.<br><br>
+        <h5>🎓Deliver High-Quality Education</h5>
+        We are committed to providing a strong academic foundation through the advanced curriculum, enriched with modern teaching methodologies, technology integration, and a focus on conceptual understanding that prepares students for academic excellence and future challenges.<br><br>
         <h5>🧠Promote Creativity and Critical Thinking</h5>
         We encourage students to explore ideas, question concepts, and think beyond textbooks. Through interactive learning, problem-solving activities, and innovative practices, we foster creativity, curiosity, and analytical thinking.<br><br>
         <h5>🌟Ensure Holistic Student Development</h5>
@@ -482,7 +482,7 @@ if (!isset($_SESSION['school_db'])) {
     <div class="features-section" data-aos="fade-up">
       <div class="container">
         <p id="about_school" style="margin-bottom: 1.5rem;">
-          At Victory's Futuregen International School, we understand that choosing the right school is one of the most important decisions for every parent. Our commitment to excellence, safety, and holistic development has earned the trust and confidence of families who seek the very best for their children.
+          At Victory's Futuregen EM High School, we understand that choosing the right school is one of the most important decisions for every parent. Our commitment to excellence, safety, and holistic development has earned the trust and confidence of families who seek the very best for their children.
         </p>
 
         <div class="row g-4">
@@ -527,7 +527,7 @@ if (!isset($_SESSION['school_db'])) {
     <div class="features-section" data-aos="fade-up">
       <div class="container">
         <p id="about_school" style="margin-bottom: 1.5rem;">
-          At Victory's Futuregen International School, our campus is thoughtfully designed to create a stimulating, safe, and inspiring environment where students can explore, learn, and grow with confidence. Every aspect of our infrastructure reflects our commitment to providing a balanced blend of comfort, innovation, and functionality.
+          At Victory's Futuregen EM High School, our campus is thoughtfully designed to create a stimulating, safe, and inspiring environment where students can explore, learn, and grow with confidence. Every aspect of our infrastructure reflects our commitment to providing a balanced blend of comfort, innovation, and functionality.
         </p>
 
         <div class="row g-4">

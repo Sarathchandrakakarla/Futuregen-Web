@@ -49,8 +49,16 @@ while ($row = mysqli_fetch_assoc($q)) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="An Official Web Portal For Futuregen Schools, Kodur." />
-  <title>Futuregen Schools Portal</title>
+    content="An Official Web Portal For Futuregen School, Kodur." />
+  <meta name="description" content="Futuregen School in Railway Kodur, Tirupati District, Andhra Pradesh 516101 offers exceptional English medium education from Nursery to 8th grade. Modern facilities, experienced faculty, and holistic development. Admissions open for 2026-27.">
+  <meta name="author" content="Futuregen School">
+  <meta name="keywords" content="Futuregen School School, Railway Kodur school, English medium school Kodur, Tirupati district, Nursery to 10th admission, CBSE school Railway Kodur, best school Railway Kodur, Admissions open for 2026-27, quality education Andhra Pradesh, CBSE school, primary secondary education, pincode 516101">
+  <meta name="creator" content="Futuregen School">
+  <meta name="publisher" content="Futuregen School">
+  <meta name="robots" content="index, follow">
+  <meta property="og:description" content="Futuregen School in Railway Kodur, Tirupati District, Andhra Pradesh 516101 offers exceptional English medium education from Nursery to 8th grade. Modern facilities, experienced faculty, and holistic development.">
+  <meta property="og:url" content="https://futuregenschool.com">
+  <title>Futuregen School Portal</title>
 
   <link
     rel="shortcut icon"
@@ -132,7 +140,7 @@ while ($row = mysqli_fetch_assoc($q)) {
 
     <!-- text + CTA -->
     <section class="vs-content">
-      <h1>Welcome to Futuregen Schools Portal</h1>
+      <h1>Welcome to Futuregen School Portal</h1>
       <p class="vs-subtitle">
         Pioneering holistic education for young minds.
       </p>
