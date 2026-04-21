@@ -1,96 +1,18 @@
 <?php
 session_start();
-
-/**
- * STEP 1: Accept school selection (POST only)
- */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['school_code'])) {
-
-  $schoolCode = trim($_POST['school_code']);
-
-  $central = mysqli_connect('localhost', 'root', '', 'central');
-  if (!$central) {
-    die('System unavailable');
-  }
-
-  $stmt = mysqli_prepare(
-    $central,
-    "SELECT
-            school_id,
-            school_code,
-            school_name,
-            display_name,
-            parent_org,
-            db_host,
-            db_user,
-            db_pass,
-            db_name,
-            Root_Dir,
-            Media_Root_Dir
-         FROM school_master
-         WHERE school_code = ?
-           AND active_flag = 1
-         LIMIT 1"
-  );
-
-  mysqli_stmt_bind_param($stmt, 's', $schoolCode);
-  mysqli_stmt_execute($stmt);
-  $result = mysqli_stmt_get_result($stmt);
-
-  if ($school = mysqli_fetch_assoc($result)) {
-    $_SESSION['school_db'] = [
-      'school_id'     => (int)$school['school_id'],
-      'school_code'   => $school['school_code'],
-      'school_name'   => $school['school_name'],
-      'display_name'  => $school['display_name'],
-      'parent_org'    => $school['parent_org'],
-      'db_host'       => $school['db_host'],
-      'db_user'       => $school['db_user'],
-      'db_pass'       => $school['db_pass'],
-      'db_name'       => $school['db_name'],
-      'Root_Dir'      => $school['Root_Dir'],
-      'Media_Root_Dir' => $school['Media_Root_Dir'],
-    ];
-    switch ($_SESSION['school_db']['school_code']) {
-      case 'VHS':
-        $_SESSION['school_db']['footer_msg'] = "Victory Educational Society";
-        break;
-      case 'FGS':
-        $_SESSION['school_db']['footer_msg'] = "Futuregen EM High School";
-        break;
-    }
-    header("Location: /Futuregen/index.php", true, 303);
-    exit;
-  } else {
-    unset($_SESSION['school_db']);
-    header('Location: /Futuregen/Welcome/preindex.php');
-    exit;
-  }
-}
-
-/**
- * STEP 2: Enforce school selection
- */
 if (!isset($_SESSION['school_db'])) {
   header('Location: /Futuregen/Welcome/preindex.php');
   exit;
 }
 
-/**
- * STEP 3: Now routing is allowed
- */
-//require_once __DIR__ . '/db_router.php';
-
-$rootDir = rtrim($_SERVER['DOCUMENT_ROOT'], '/') . $_SESSION['school_db']['Root_Dir'];
-$myfile = fopen($rootDir . "/test.txt", "r");
-if (filesize($rootDir . "/test.txt") != 0) {
-  $text = fread($myfile, filesize($rootDir . "/test.txt"));
-  if ($text != "") {
-    $_SESSION['Text'] = $text;
-  }
-  fclose($myfile);
-}
-
+$documents = [
+  "Affiliation Certificates" => [
+    ["title" => "CBSE Affiliation Certificate", "file" => "/Images/Approvals/cbse.jpg"],
+  ],
+  "Government Approvals" => [
+    ["title" => "State Government Recognition", "file" => "/Images/Approvals/cbse.jpg"],
+  ],
+];
 ?>
 
 <!DOCTYPE html>
@@ -125,6 +47,9 @@ if (filesize($rootDir . "/test.txt") != 0) {
 
   body {
     background-color: lightblue;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Header */
@@ -279,15 +204,6 @@ if (filesize($rootDir . "/test.txt") != 0) {
     }
   }
 
-  .carousel-holder {
-    padding: 20px;
-    padding-top: 0;
-  }
-
-  .carousel-item img {
-    border-radius: 10px;
-  }
-
   marquee {
     padding-left: 10%;
   }
@@ -393,20 +309,6 @@ if (filesize($rootDir . "/test.txt") != 0) {
     }
   }
 
-  #play-text {
-    text-align: right;
-  }
-
-  @media screen and (max-width:576px) {
-    #play-text {
-      text-align: center;
-    }
-
-    #play-icon {
-      padding-left: 25%;
-    }
-  }
-
   .company-tag {
     padding-top: 3px;
     float: right !important;
@@ -415,6 +317,86 @@ if (filesize($rootDir . "/test.txt") != 0) {
   @media (min-width:500px) {
     .company-tag {
       margin-left: 15%;
+    }
+  }
+
+  .approvals-section {
+    background: #fff;
+    padding: 60px 0;
+    flex: 1;
+  }
+
+  .approvals-intro {
+    max-width: 720px;
+    margin: 0 auto 35px;
+    color: #555;
+    line-height: 1.7;
+  }
+
+  .approval-category {
+    margin-bottom: 35px;
+  }
+
+  .approval-card {
+    margin-bottom: 30px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .approval-card img {
+    height: 220px;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .approval-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .approval-card .btn {
+    margin-top: 8px;
+  }
+
+  .approval-modal-image {
+    width: 100%;
+    max-height: 75vh;
+    object-fit: contain;
+  }
+
+  footer {
+    position: static;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 0;
+  }
+
+  .footer-bottom {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .footer-bottom p {
+    float: none;
+    margin: 0;
+  }
+
+  .company-tag {
+    margin-left: 0 !important;
+  }
+
+  @media (max-width:768px) {
+    .footer-bottom {
+      justify-content: center;
+      text-align: center;
     }
   }
 </style>
@@ -426,7 +408,7 @@ if (filesize($rootDir . "/test.txt") != 0) {
       <img src="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/Victory Logo.png" alt="..." width="70px" />
     </div>
     <div class="heading">
-      <h3 style="<?php if($_SESSION['school_db']['school_code'] == 'FGS') echo 'font-size: medium;'; ?>"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></h3>
+      <h3 style="<?php if ($_SESSION['school_db']['school_code'] == 'FGS') echo 'font-size: medium;'; ?>"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></h3>
     </div>
     <input type="checkbox" id="click" />
     <label for="click" class="menu-btn">
@@ -435,7 +417,7 @@ if (filesize($rootDir . "/test.txt") != 0) {
     <ul>
       <li><a class="active" href="/Futuregen/index.php">Home</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
-      <li><a href="/Futuregen/approvals.php">Approvals & Affiliations</a></li>
+      <li><a href="#approvals-section">Approvals & Affiliations</a></li>
       <!--<li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>-->
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
       <!--<li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
@@ -450,85 +432,86 @@ if (filesize($rootDir . "/test.txt") != 0) {
       </li>
     </ul>
   </nav>
-  <?php if (isset($_SESSION['Text'])) { ?>
-    <div class="container-fluid marquee-container">
-      <marquee width="100%" behavior="alternate" scrollamount="12">
-        <img src="/Futuregen/Images/new.png" alt="..." class="icon" width="50px" />
-        <b style="font-family: 'Times New Roman'" id="marquee-text"><?php if (isset($_SESSION['Text'])) {
-                                                                      echo $_SESSION['Text'];
-                                                                    } ?></b>
-      </marquee>
-    </div>
-  <?php } ?>
-  <!-- Carousel -->
-  <div class="container-fluid carousel-holder bg-light">
-    <div class="row">
-      <div class="col-lg-12">
-        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="border-radius: 10px">
-          <ol class="carousel-indicators">
-            <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-            <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-            <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
-            <li data-target="#carouselExampleIndicators" data-slide-to="3"></li>
-            <li data-target="#carouselExampleIndicators" data-slide-to="4"></li>
-          </ol>
-          <div class="carousel-inner">
-            <div class="carousel-item active">
-              <img class="d-block w-100" src="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/slides/event1.jpg" alt="First slide" />
-            </div>
-            <div class="carousel-item">
-              <img class="d-block w-100" src="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/slides/event2.jpg" alt="Second slide" />
-            </div>
-            <div class="carousel-item">
-              <img class="d-block w-100" src="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/slides/event3.jpg" alt="Third slide" />
-            </div>
-            <div class="carousel-item">
-              <img class="d-block w-100" src="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/slides/event4.jpg" alt="Fourth slide" />
-            </div>
-            <div class="carousel-item">
-              <img class="d-block w-100" src="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/slides/event5.jpg" alt="Fifth slide" />
-            </div>
+
+  <section id="approvals-section" class="approvals-section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h1 class="mb-3">Approvals & Affiliations</h1>
+        <p class="approvals-intro">
+          Our institution is committed to maintaining recognized standards of education and administration. Below are the key approvals and affiliation documents that reflect our compliance and academic credibility.
+        </p>
+      </div>
+
+      <?php foreach ($documents as $category => $items): ?>
+        <div class="approval-category">
+          <h3 class="mb-4"><?= htmlspecialchars($category) ?></h3>
+          <div class="row">
+            <?php foreach ($items as $document): ?>
+              <div class="col-12 col-sm-6 col-md-6 col-lg-3 d-flex">
+                <div class="card approval-card w-100">
+                  <img src="<?= htmlspecialchars($document['file']) ?>" class="card-img-top" alt="<?= htmlspecialchars($document['title']) ?>">
+                  <div class="card-body">
+                    <h5 class="card-title"><?= htmlspecialchars($document['title']) ?></h5>
+                    <div class="mt-3">
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        data-toggle="modal"
+                        data-target="#approvalModal"
+                        data-title="<?= htmlspecialchars($document['title']) ?>"
+                        data-image="<?= htmlspecialchars($document['file']) ?>">
+                        View
+                      </button>
+                      <a href="<?= htmlspecialchars($document['file']) ?>" class="btn btn-outline-secondary btn-sm" download>
+                        Download
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
           </div>
-          <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-          </a>
-          <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-          </a>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </section>
+
+  <div class="modal fade" id="approvalModal" tabindex="-1" role="dialog" aria-labelledby="approvalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="approvalModalLabel">Document Preview</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center">
+          <img src="" alt="Approval Document" id="approvalModalImage" class="approval-modal-image img-fluid">
         </div>
       </div>
     </div>
   </div>
-  <?php if (isset($_SESSION['school_db']['school_code']) && $_SESSION['school_db']['school_code'] == "VHS") { ?>
-    <div class="play-div p-2">
-      <div class="row justify-content-center">
-        <div class="col-lg-4 mt-4" id="play-text">
-          <p><b>Download Android App of our Futuregen School</b></p>
-        </div>
-        <div class="col-lg-4">
-          <a href="https://play.google.com/store/apps/details?id=com.victoryschools" target="_blank" id="play-icon">
-            <img src="/Futuregen/Images/GooglePlay.png" alt="..." width="50%">
-          </a>
-        </div>
-      </div>
-    </div>
-  <?php } ?>
+
   <footer>
     <div class="footer-bottom">
       <p>&copy; <?php echo date('Y'); ?>, <a href="/"> <?= (isset($_SESSION['school_db']) && isset($_SESSION['school_db']['footer_msg'])) ? $_SESSION['school_db']['footer_msg'] : ''; ?> </a>. All Rights Reserved. </p>
       <p class="company-tag">Developed and Maintained by <u><a href="https://sarathtechgenics.netlify.app" target="_blank">Sarath Techgenics</a></u></p>
     </div>
   </footer>
+  
   <!-- Scripts -->
+  <script>
+    $('#approvalModal').on('show.bs.modal', function(event) {
+      var button = $(event.relatedTarget);
+      var image = button.data('image');
+      var title = button.data('title');
+      var modal = $(this);
 
-  <!-- Carousel Interval -->
-  <script type="text/javascript">
-    $(".carousel").carousel({
-      interval: 3000,
+      modal.find('.modal-title').text(title);
+      modal.find('#approvalModalImage').attr('src', image).attr('alt', title);
     });
   </script>
+
 </body>
 
 </html>

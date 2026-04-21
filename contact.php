@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['school_db'])) {
-  header('Location: /Victory/Welcome/preindex.php');
+  header('Location: /Futuregen/Welcome/preindex.php');
   exit;
 }
 ?>
