@@ -6,11 +6,12 @@ if (!isset($_SESSION['school_db'])) {
 }
 
 $documents = [
-  "Affiliation Certificates" => [
-    ["title" => "CBSE Affiliation Certificate", "file" => "/Images/Approvals/cbse.jpg"],
-  ],
   "Government Approvals" => [
-    ["title" => "State Government Recognition", "file" => "/Images/Approvals/cbse.jpg"],
+    [
+      "title" => "School Permission Proceedings",
+      "front" => "/Futuregen/Images/approvals/Permission1.jpg",
+      "back" => "/Futuregen/Images/approvals/Permission2.jpg"
+    ],
   ],
 ];
 ?>
@@ -415,9 +416,9 @@ $documents = [
       <i class="fas fa-bars"></i>
     </label>
     <ul>
-      <li><a class="active" href="/Futuregen/index.php">Home</a></li>
+      <li><a href="/Futuregen/index.php">Home</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
-      <li><a href="#approvals-section">Approvals & Affiliations</a></li>
+      <li><a class="active" href="#approvals-section">Approvals & Affiliations</a></li>
       <!--<li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>-->
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
       <!--<li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
@@ -449,7 +450,7 @@ $documents = [
             <?php foreach ($items as $document): ?>
               <div class="col-12 col-sm-6 col-md-6 col-lg-3 d-flex">
                 <div class="card approval-card w-100">
-                  <img src="<?= htmlspecialchars($document['file']) ?>" class="card-img-top" alt="<?= htmlspecialchars($document['title']) ?>">
+                  <img src="<?= htmlspecialchars($document['front']) ?>" class="card-img-top" alt="<?= htmlspecialchars($document['title']) ?>">
                   <div class="card-body">
                     <h5 class="card-title"><?= htmlspecialchars($document['title']) ?></h5>
                     <div class="mt-3">
@@ -459,12 +460,10 @@ $documents = [
                         data-toggle="modal"
                         data-target="#approvalModal"
                         data-title="<?= htmlspecialchars($document['title']) ?>"
-                        data-image="<?= htmlspecialchars($document['file']) ?>">
+                        data-front="<?= htmlspecialchars($document['front']) ?>"
+                        data-back="<?= htmlspecialchars(isset($document['back']) ? $document['back'] : '') ?>">
                         View
                       </button>
-                      <a href="<?= htmlspecialchars($document['file']) ?>" class="btn btn-outline-secondary btn-sm" download>
-                        Download
-                      </a>
                     </div>
                   </div>
                 </div>
@@ -486,6 +485,10 @@ $documents = [
           </button>
         </div>
         <div class="modal-body text-center">
+          <div id="approvalModalToggleWrap" class="btn-group mb-3 d-none" role="group" aria-label="Document side toggle">
+            <button type="button" class="btn btn-outline-primary active" id="approvalFrontBtn">Front</button>
+            <button type="button" class="btn btn-outline-primary" id="approvalBackBtn">Back</button>
+          </div>
           <img src="" alt="Approval Document" id="approvalModalImage" class="approval-modal-image img-fluid">
         </div>
       </div>
@@ -501,14 +504,48 @@ $documents = [
   
   <!-- Scripts -->
   <script>
+    var approvalModalState = {
+      front: '',
+      back: ''
+    };
+
     $('#approvalModal').on('show.bs.modal', function(event) {
       var button = $(event.relatedTarget);
-      var image = button.data('image');
       var title = button.data('title');
+      var front = button.data('front');
+      var back = button.data('back');
       var modal = $(this);
+      var toggleWrap = modal.find('#approvalModalToggleWrap');
+
+      approvalModalState.front = front;
+      approvalModalState.back = back;
 
       modal.find('.modal-title').text(title);
-      modal.find('#approvalModalImage').attr('src', image).attr('alt', title);
+      modal.find('#approvalModalImage').attr('src', front).attr('alt', title);
+      modal.find('#approvalFrontBtn').addClass('active');
+      modal.find('#approvalBackBtn').removeClass('active');
+
+      if (back) {
+        toggleWrap.removeClass('d-none');
+      } else {
+        toggleWrap.addClass('d-none');
+      }
+    });
+
+    $('#approvalFrontBtn').on('click', function() {
+      $('#approvalModalImage').attr('src', approvalModalState.front);
+      $(this).addClass('active');
+      $('#approvalBackBtn').removeClass('active');
+    });
+
+    $('#approvalBackBtn').on('click', function() {
+      if (!approvalModalState.back) {
+        return;
+      }
+
+      $('#approvalModalImage').attr('src', approvalModalState.back);
+      $(this).addClass('active');
+      $('#approvalFrontBtn').removeClass('active');
     });
   </script>
 
