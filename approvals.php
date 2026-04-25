@@ -8,9 +8,19 @@ if (!isset($_SESSION['school_db'])) {
 $documents = [
   "Government Approvals" => [
     [
-      "title" => "School Permission Proceedings",
-      "front" => "/Futuregen/Images/approvals/Permission1.jpg",
-      "back" => "/Futuregen/Images/approvals/Permission2.jpg"
+      "title" => "Victory's Futuregen School Permission Proceedings",
+      "thumbnail" => "/Futuregen/Images/approvals/Permission1.jpg",
+      "files" => [
+        "/Futuregen/Images/approvals/Permission1.jpg",
+        "/Futuregen/Images/approvals/Permission2.jpg"
+      ]
+    ],
+    [
+      "title" => "Victory's Futuregen School Recognition",
+      "thumbnail" => "/Futuregen/Images/approvals/Victory's Futuregen School Recognition.jpg",
+      "files" => [
+        "/Futuregen/Images/approvals/Victory's Futuregen School Recognition.pdf",
+      ]
     ],
   ],
 ];
@@ -448,9 +458,16 @@ $documents = [
           <h3 class="mb-4"><?= htmlspecialchars($category) ?></h3>
           <div class="row">
             <?php foreach ($items as $document): ?>
+              <?php
+              $documentFiles = isset($document['files']) && is_array($document['files']) ? $document['files'] : [];
+              $thumbnail = isset($document['thumbnail']) && $document['thumbnail'] !== '' ? $document['thumbnail'] : (isset($documentFiles[0]) ? $documentFiles[0] : '');
+              if ($thumbnail !== '' && strtolower(pathinfo(parse_url($thumbnail, PHP_URL_PATH), PATHINFO_EXTENSION)) === 'pdf') {
+                $thumbnail = '/Futuregen/Images/pdf-icon.png';
+              }
+              ?>
               <div class="col-12 col-sm-6 col-md-6 col-lg-3 d-flex">
                 <div class="card approval-card w-100">
-                  <img src="<?= htmlspecialchars($document['front']) ?>" class="card-img-top" alt="<?= htmlspecialchars($document['title']) ?>">
+                  <img src="<?= htmlspecialchars($thumbnail) ?>" class="card-img-top" alt="<?= htmlspecialchars($document['title']) ?>">
                   <div class="card-body">
                     <h5 class="card-title"><?= htmlspecialchars($document['title']) ?></h5>
                     <div class="mt-3">
@@ -460,8 +477,7 @@ $documents = [
                         data-toggle="modal"
                         data-target="#approvalModal"
                         data-title="<?= htmlspecialchars($document['title']) ?>"
-                        data-front="<?= htmlspecialchars($document['front']) ?>"
-                        data-back="<?= htmlspecialchars(isset($document['back']) ? $document['back'] : '') ?>">
+                        data-files='<?= htmlspecialchars(json_encode($documentFiles), ENT_QUOTES, 'UTF-8') ?>'>
                         View
                       </button>
                     </div>
@@ -486,10 +502,9 @@ $documents = [
         </div>
         <div class="modal-body text-center">
           <div id="approvalModalToggleWrap" class="btn-group mb-3 d-none" role="group" aria-label="Document side toggle">
-            <button type="button" class="btn btn-outline-primary active" id="approvalFrontBtn">Front</button>
-            <button type="button" class="btn btn-outline-primary" id="approvalBackBtn">Back</button>
           </div>
           <img src="" alt="Approval Document" id="approvalModalImage" class="approval-modal-image img-fluid">
+          <iframe id="approvalModalPDF" class="w-100 d-none" style="height:75vh;"></iframe>
         </div>
       </div>
     </div>
@@ -504,48 +519,81 @@ $documents = [
   
   <!-- Scripts -->
   <script>
-    var approvalModalState = {
-      front: '',
-      back: ''
-    };
+    var files = [];
+    var currentIndex = 0;
+
+    function isPDF(file) {
+      return file.toLowerCase().endsWith('.pdf');
+    }
+
+    function loadApprovalFile(index) {
+      if (!files[index]) {
+        return;
+      }
+
+      currentIndex = index;
+
+      var file = files[currentIndex];
+      var modal = $('#approvalModal');
+      var image = modal.find('#approvalModalImage');
+      var pdf = modal.find('#approvalModalPDF');
+
+      if (isPDF(file)) {
+        image.addClass('d-none').attr('src', '');
+        pdf.removeClass('d-none').attr('src', file);
+      } else {
+        pdf.addClass('d-none').attr('src', '');
+        image.removeClass('d-none').attr('src', file);
+      }
+
+      modal.find('#approvalModalToggleWrap button').removeClass('active');
+      modal.find('#approvalModalToggleWrap button[data-index="' + currentIndex + '"]').addClass('active');
+    }
 
     $('#approvalModal').on('show.bs.modal', function(event) {
       var button = $(event.relatedTarget);
       var title = button.data('title');
-      var front = button.data('front');
-      var back = button.data('back');
+      var raw = button.attr('data-files');
       var modal = $(this);
       var toggleWrap = modal.find('#approvalModalToggleWrap');
 
-      approvalModalState.front = front;
-      approvalModalState.back = back;
+      files = [];
+      currentIndex = 0;
+
+      try {
+        files = JSON.parse(raw);
+      } catch (e) {
+        files = [];
+      }
 
       modal.find('.modal-title').text(title);
-      modal.find('#approvalModalImage').attr('src', front).attr('alt', title);
-      modal.find('#approvalFrontBtn').addClass('active');
-      modal.find('#approvalBackBtn').removeClass('active');
+      modal.find('#approvalModalImage').attr('alt', title);
+      toggleWrap.empty();
 
-      if (back) {
+      if (files.length > 1) {
         toggleWrap.removeClass('d-none');
       } else {
         toggleWrap.addClass('d-none');
       }
+
+      files.forEach(function(file, index) {
+        var labelType = isPDF(file) ? 'PDF' : 'Image';
+        var button = $('<button type="button" class="btn btn-outline-primary"></button>');
+        button.text(labelType + ' ' + (index + 1));
+        button.attr('data-index', index);
+
+        if (index === 0) {
+          button.addClass('active');
+        }
+
+        toggleWrap.append(button);
+      });
+
+      loadApprovalFile(0);
     });
 
-    $('#approvalFrontBtn').on('click', function() {
-      $('#approvalModalImage').attr('src', approvalModalState.front);
-      $(this).addClass('active');
-      $('#approvalBackBtn').removeClass('active');
-    });
-
-    $('#approvalBackBtn').on('click', function() {
-      if (!approvalModalState.back) {
-        return;
-      }
-
-      $('#approvalModalImage').attr('src', approvalModalState.back);
-      $(this).addClass('active');
-      $('#approvalFrontBtn').removeClass('active');
+    $('#approvalModalToggleWrap').on('click', 'button', function() {
+      loadApprovalFile(parseInt($(this).attr('data-index'), 10));
     });
   </script>
 
