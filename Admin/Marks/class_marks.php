@@ -277,7 +277,6 @@ error_reporting(0);
         //Queries
         $query1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Stu_Class = '" . $cls . "' AND Stu_Section = '" . $sec . "'");
         $query2 = mysqli_query($link, "SELECT * FROM `class_wise_subjects` WHERE Class = '" . $cls . "' AND Exam = '" . $exm . "'");
-        $query4 = mysqli_query($link, "SELECT * FROM `stu_marks` WHERE Class = '" . $cls . "' AND Section = '" . $sec . "' AND Exam = '" . $exm . "'");
 
 
         if ($query1) {
@@ -333,65 +332,11 @@ error_reporting(0);
                         }
                     }
 
-                    //Checking If there is data of that class,section and Exam
-                    if (mysqli_num_rows($query4) != 0) {
-                        $flag = false;
-                        while ($row4 = mysqli_fetch_assoc($query4)) {
-                            if ($id == $row4['Id_No']) {
-                                $flag = true;
-                                break;
-                            } else {
-                                $flag = false;
-                            }
-                        }
-                        //If Id is not there in DB, Insert Student
-                        if (!$flag) {
+                    //Checking If there is data of that Id_No and Exam
+                    $existing = mysqli_query($link, "SELECT * FROM `stu_marks` WHERE Id_No = '" . $id . "' AND Exam = '" . $exm . "'");
 
-                            $i_sql .= "(Class,Section,Id_No,First_Name,Exam)VALUES('" . $cls . "','" . $sec . "','" . $id . "','" . $names[$id] . "','" . $exm . "');";
-                            if (mysqli_query($link, $i_sql)) {
-                                $status = true;
-                            } else {
-                                $status = false;
-                                break;
-                            }
-                            $i_sql = "INSERT INTO `stu_marks` ";
-
-                            //Checking Every Mark in local and DB and Update Data
-                            for ($c = 0; $c < count($subs); $c++) {
-                                if (($id_old_marks[$id][$c] != '') || ($id_new_marks[$id][$c] != '' && $id_old_marks[$id][$c] == '')) {
-                                    $u_sql .= "sub" . ($c + 1) . " = '" . $id_new_marks[$id][$c] . "',Total = '" . $total . "' WHERE Id_No = '" . $id . "' AND Exam = '" . $exm . "';";
-                                    if (mysqli_query($link, $u_sql)) {
-                                        $status = true;
-                                    } else {
-                                        $status = false;
-                                        break;
-                                    }
-                                    $u_sql = "UPDATE `stu_marks` SET ";
-                                }
-                            }
-                            $total = 0;
-                        }
-                        //If Id is Present in DB
-                        else {
-                            //Checking every Mark in local and DB and Update data
-                            for ($c = 0; $c < count($subs); $c++) {
-                                if (($id_old_marks[$id][$c] != '') || ($id_new_marks[$id][$c] != '' && $id_old_marks[$id][$c] == '')) {
-                                    $u_sql .= "sub" . ($c + 1) . " = '" . $id_new_marks[$id][$c] . "',Total = '" . $total . "' WHERE Id_No = '" . $id . "' AND Exam = '" . $exm . "';";
-                                    if (mysqli_query($link, $u_sql)) {
-                                        $status = true;
-                                    } else {
-                                        $status = false;
-                                        break;
-                                    }
-                                    $u_sql = "UPDATE `stu_marks` SET ";
-                                }
-                            }
-                            $total = 0;
-                        }
-                    }
-                    //If there are no rows of that class,section and Exam
-                    else {
-                        //Insert the Student
+                    if (mysqli_num_rows($existing) == 0) {
+                        //Insert the Student if Id_No and Exam is not there in DB
                         $i_sql .= "(Class,Section,Id_No,First_Name,Exam)VALUES('" . $cls . "','" . $sec . "','" . $id . "','" . $names[$id] . "','" . $exm . "');";
                         if (mysqli_query($link, $i_sql)) {
                             $status = true;
@@ -404,7 +349,31 @@ error_reporting(0);
                         //Checking Every Mark in local and DB and Update Data
                         for ($c = 0; $c < count($subs); $c++) {
                             if (($id_old_marks[$id][$c] != '') || ($id_new_marks[$id][$c] != '' && $id_old_marks[$id][$c] == '')) {
-                                $u_sql .= "sub" . ($c + 1) . " = '" . $id_new_marks[$id][$c] . "',Total = '" . $total . "' WHERE Id_No = '" . $id . "' AND Exam = '" . $exm . "';";
+                                $u_sql .= "Class = '" . $cls . "',Section = '" . $sec . "',sub" . ($c + 1) . " = '" . $id_new_marks[$id][$c] . "',Total = '" . $total . "' WHERE Id_No = '" . $id . "' AND Exam = '" . $exm . "';";
+                                if (mysqli_query($link, $u_sql)) {
+                                    $status = true;
+                                } else {
+                                    $status = false;
+                                    break;
+                                }
+                                $u_sql = "UPDATE `stu_marks` SET ";
+                            }
+                        }
+                        $total = 0;
+                    } else {
+                        $u_sql .= "Class = '" . $cls . "',Section = '" . $sec . "' WHERE Id_No = '" . $id . "' AND Exam = '" . $exm . "';";
+                        if (mysqli_query($link, $u_sql)) {
+                            $status = true;
+                        } else {
+                            $status = false;
+                            break;
+                        }
+                        $u_sql = "UPDATE `stu_marks` SET ";
+
+                        //Checking every Mark in local and DB and Update data
+                        for ($c = 0; $c < count($subs); $c++) {
+                            if (($id_old_marks[$id][$c] != '') || ($id_new_marks[$id][$c] != '' && $id_old_marks[$id][$c] == '')) {
+                                $u_sql .= "Class = '" . $cls . "',Section = '" . $sec . "',sub" . ($c + 1) . " = '" . $id_new_marks[$id][$c] . "',Total = '" . $total . "' WHERE Id_No = '" . $id . "' AND Exam = '" . $exm . "';";
                                 if (mysqli_query($link, $u_sql)) {
                                     $status = true;
                                 } else {
