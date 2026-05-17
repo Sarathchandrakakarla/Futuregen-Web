@@ -2,43 +2,19 @@
 include_once('../../link.php');
 include_once('../includes/rbac_helper.php');
 
-define('MENU_ID', 198);
+define('MENU_ID', 200);
 
 requireLogin();
 requireMenuAccess(MENU_ID);
 $conn = connectCentralDB();
 
-error_reporting(0);
+//error_reporting(0);
 ?>
 <?php
 $branches = [];
 $branch_query = mysqli_query($link, "SELECT * FROM central.school_master WHERE parent_org = 'Victory' AND active_flag = 1");
 while ($branch_row = mysqli_fetch_assoc($branch_query)) {
     $branches[$branch_row['school_code']] = $branch_row['display_name'];
-}
-
-if (isset($_POST['Action']) && $_POST['Action'] == "Get_User_List") {
-    $branch = $_POST['Branch'];
-    $type = $_POST['Type'];
-    if ($branch == "VHS") {
-        $db = "vtest";
-    } else if ($branch == "FGS") {
-        $db = "futuregen";
-    }
-    if ($type == "Admin") {
-        $table = "admin";
-        $users_query = "SELECT Admin_Id_No AS Id_No, Admin_Name AS Name FROM {$db}.{$table}";
-    } else if ($type == "Faculty") {
-        $table = "employee_master_data";
-        $users_query = "SELECT Emp_Id AS Id_No, Emp_First_Name AS Name FROM {$db}.{$table} WHERE Status = 'Working'";
-    }
-    $users_query = mysqli_query($link, $users_query);
-    $users = [];
-    while ($users_row = mysqli_fetch_assoc($users_query)) {
-        $users[] = ["Id_No" => $users_row['Id_No'], "Name" => $users_row['Name']];
-    }
-    echo json_encode(["User_List" => $users, "Owner_Table" => $db . "." . $table]);
-    exit;
 }
 
 // Read JSON input
@@ -110,7 +86,7 @@ if (isset($input['Action']) && $input['Action'] === 'Search_Application') {
 
     // 🔹 Final Query (same as Node)
     $sql = "
-        SELECT app.*, app.Created_By_Id, sm.Display_Name AS Branch_Name
+        SELECT app.*, sm.Display_Name AS Branch_Name
         FROM applications app
         JOIN school_master sm ON app.Branch = sm.School_Code
         WHERE " . implode(" AND ", $conditions) . "
@@ -158,7 +134,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Application') {
     }
 
     $sql = "
-        SELECT app.*, app.Created_By_Id, sm.Display_Name AS Branch_Name
+        SELECT app.*, sm.Display_Name AS Branch_Name
         FROM applications app
         JOIN school_master sm ON app.Branch = sm.School_Code
         WHERE app.App_No = ?
@@ -188,10 +164,10 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
     $filters = $input['filters'] ?? [];
 
     $query = "
-        SELECT app.*, app.Created_By_Id, sm.Display_Name AS Branch_Name
+        SELECT app.*, sm.Display_Name AS Branch_Name
         FROM applications app
         LEFT JOIN school_master sm ON app.Branch = sm.School_Code
-        WHERE 1=1
+        WHERE app.Owner_Id = '" . $_SESSION['Id_No'] . "'
     ";
 
     if (!empty($filters['appNo'])) {
@@ -242,23 +218,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
     if (!empty($filters['previousSchool'])) {
         $ps = mysqli_real_escape_string($conn, $filters['previousSchool']);
         $query .= " AND app.Previous_School LIKE '%$ps%'";
-    }
-
-    if (!empty($filters['referredByType']) && $filters['referredByType'] == 'Staff') {
-        if (!empty($filters['referredOwnerId']) && !empty($filters['referredOwnerTable'])) {
-            $ownerId = mysqli_real_escape_string($conn, $filters['referredOwnerId']);
-            $ownerTable = mysqli_real_escape_string($conn, $filters['referredOwnerTable']);
-            $query .= " AND app.Owner_Id = '$ownerId' AND app.Owner_Table = '$ownerTable'";
-        }
-    }
-
-    if (!empty($filters['referredByType']) && $filters['referredByType'] == 'Non-Staff') {
-        $query .= " AND app.Owner_Id IS NULL";
-
-        if (!empty($filters['referredByText'])) {
-            $referredBy = mysqli_real_escape_string($conn, $filters['referredByText']);
-            $query .= " AND app.Referred_By LIKE '%$referredBy%'";
-        }
     }
 
     if (!empty($filters['fromDate'])) {
@@ -612,254 +571,223 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
     <!-- CREATE / EDIT -->
     <div id="form_section" class="section" style="display:none;">
         <div class="container" style="max-width: 700px;padding: 25px 30px;">
-            <div class="content">
-                <div class="input-box" style="max-width:300px; margin-bottom:20px;">
-                    <span class="details">Select Branch <span class="required">*</span></span>
-                    <select id="branch_select" name="Branch" required>
-                        <option value="" selected disabled>-- Select Branch --</option>
-                        <?php
-                        foreach ($branches as $branch_code => $branch_name) {
-                            echo '<option value="' . $branch_code . '">' . $branch_name . '</option>';
-                        }
-                        ?>
-                    </select>
+            <div id="form_container">
+                <div class="content">
+                    <div class="input-box" style="max-width:300px; margin-bottom:20px;">
+                        <span class="details">Select Branch <span class="required">*</span></span>
+                        <select id="branch_select" name="Branch" required>
+                            <option value="" selected disabled>-- Select Branch --</option>
+                            <?php
+                            foreach ($branches as $branch_code => $branch_name) {
+                                echo '<option value="' . $branch_code . '">' . $branch_name . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="content" id="application_form" style="display: none;">
+                    <div class="title">Student Personal Details</div>
+                    <form id="app_form" action="" method="POST" onsubmit="return validateAndConfirm()">
+                        <input type="hidden" name="Branch_Hidden" id="branch_hidden">
+                        <input type="hidden" name="App_No" id="edit_app_no">
+                        <input type="hidden" name="force_insert" id="force_insert" value="0">
+                        <div class="user-details">
+                            <div class="input-box" id="app_no_box" style="display:none;">
+                                <span class="details">Application No</span>
+                                <input type="text" id="display_app_no" readonly />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Full Name <span class="required">*</span></span>
+                                <input type="text" placeholder="Enter Fullname" id="first_name" name="First_Name" oninput="this.value = this.value.toUpperCase()" required />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Surname <span class="required">*</span></span>
+                                <input type="text" placeholder="Enter Surname" id="sur_name" name="Sur_Name" oninput="this.value = this.value.toUpperCase()" required />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Father Name <span class="required">*</span></span>
+                                <input type="text" placeholder="Enter Father Name" id="father_name" name="Father_Name" oninput="this.value = this.value.toUpperCase()" required />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Mother Name <span class="required">*</span></span>
+                                <input type="text" placeholder="Enter Mother Name" id="mother_name" name="Mother_Name" oninput="this.value = this.value.toUpperCase()" required />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Class Applied For <span class="required">*</span></span>
+                                <select name="Class_Applied" id="class_applied" required>
+                                    <option value="" selected disabled>--Select Class Applied For --</option>
+                                </select>
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Previous Class <span class="required">*</span></span>
+                                <select name="Prev_Class" id="prev_class">
+                                    <option value="" selected disabled>--Select Previous Class --</option>
+                                </select>
+                            </div>
+                            <div class="gender-details">
+                                <span class="gender-title">Gender <span class="required">*</span></span>
+                                <div class="category">
+                                    <input type="radio" id="boy" value="Boy" name="Gender" required />
+                                    <span><label for="boy">Boy</label></span>
+                                    <input type="radio" id="girl" value="Girl" name="Gender" />
+                                    <span><label for="girl">Girl</label></span>
+                                </div>
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Date Of Birth <span class="required">*</span></span>
+                                <input type="date" name="DOB" id="dob" required />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Mobile Number <span class="required">*</span></span>
+                                <input type="text" minlength="10" id="mobile" placeholder="Enter Mobile No." name="Mobile" required />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Aadhar Number
+                                    <input type="text" placeholder="Enter Aadhar No." id="aadhar" maxlength="12" name="Aadhar" />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Mother Aadhar Number
+                                    <input type="text" placeholder="Enter Mother Aadhar No." id="mother_aadhar" maxlength="12" name="Mother_Aadhar" />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Father Aadhar Number
+                                    <input type="text" placeholder="Enter Father Aadhar No." id="father_aadhar" maxlength="12" name="Father_Aadhar" />
+                            </div>
+                        </div>
+                        <div class="title">Student Address Details</div>
+                        <div class="user-details">
+                            <div class="gender-details">
+                                <span class="gender-title">Religion <span class="required">*</span></span>
+                                <div class="category">
+                                    <input type="radio" id="indian-hindu" value="Indian-Hindu" name="Religion" required />
+                                    <span><label for="indian-hindu">Indian-Hindu</label></span>
+                                    <input type="radio" id="indian-islam" value="Indian-Islam" name="Religion" />
+                                    <span><label for="indian-islam">Indian-islam</label></span>
+                                    <input type="radio" id="indian-christian" value="Indian-Christian" name="Religion" />
+                                    <span><label for="indian-christian">Indian-Christian</label></span>
+                                </div>
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Caste <span class="required">*</span></span>
+                                <input type="text" placeholder="Enter Caste" name="Caste" id="caste" oninput="this.value = this.value.toUpperCase()" required />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Category <span class="required">*</span></span>
+                                <select name="Category" id="category" required>
+                                    <option value="" selected disabled>--Select Category--</option>
+                                    <option value="OC">OC</option>
+                                    <option value="BC">BC</option>
+                                    <option value="ST">ST</option>
+                                    <option value="SC">SC</option>
+                                    <option value="Mi">Mi</option>
+                                </select>
+                            </div>
+                            <div class="input-box">
+                                <span class="details">House No.
+                                    <input type="text" placeholder="Enter House No." id="house_no" oninput="this.value = this.value.toUpperCase()" name="House_No" />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Street<span class="required">*</span></span>
+                                <input type="text" placeholder="Enter Area" name="Area" id="area" oninput="this.value = this.value.toUpperCase()" required />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Village/Town <span class="required">*</span></span>
+                                <input type="text" placeholder="Enter Village" name="Village" id="village" oninput="this.value = this.value.toUpperCase()" required />
+                            </div>
+                        </div>
+                        <div class="title">Other Details</div>
+                        <div class="user-details">
+                            <div class="gender-details">
+                                <span class="gender-title">Student Type <span class="required">*</span></span>
+                                <div class="category">
+                                    <input type="radio" id="day_scholar" value="Day Scholar" name="Student_Type" required />
+                                    <span><label for="day_scholar">Day Scholar</label></span>
+                                    <input type="radio" id="hosteller" value="Hosteller" name="Student_Type" />
+                                    <span id="hosteller_label"><label for="hosteller">Hosteller</label></span>
+                                    <input type="radio" id="vanner" value="Vanner" name="Student_Type" />
+                                    <span><label for="vanner">Vanner</label></span>
+                                </div>
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Van Route</span>
+                                <select class="form-control" name="Van_Route" id="van_route" disabled>
+                                    <option value="">-- Select Route --</option>
+                                    <?php
+                                    $van_sql = mysqli_query($link, "SELECT Van_Route FROM `van_route` ORDER BY Van_Route");
+                                    while ($van_row = mysqli_fetch_assoc($van_sql)) {
+                                        echo '<option value="' . $van_row['Van_Route'] . '" >' . $van_row['Van_Route'] . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Previous School</span>
+                                <input type="text" placeholder="Enter Previous School" id="previous_school" name="Previous_School" oninput="this.value = this.value.toUpperCase()" />
+                            </div>
+                        </div>
+                        <div class="title">Payment Details</div>
+                        <div class="user-details">
+                            <div class="input-box">
+                                <span class="details">Advance Amount</span>
+                                <input type="number" placeholder="Enter Advance Amount" id="advance_amount" name="Advance_Amount" min="0" step="0.01" />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">DOP</span>
+                                <input type="date" id="dop" name="DOP" disabled />
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Payment Type</span>
+                                <select name="Payment_Type" id="payment_type" disabled>
+                                    <option value="" selected>--Select Payment Type--</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="UPI">UPI</option>
+                                </select>
+                            </div>
+                            <div class="input-box">
+                                <span class="details">Transaction Id</span>
+                                <input type="text" placeholder="Enter Transaction Id" id="transaction_id" name="Transaction_Id" disabled />
+                            </div>
+                            <div class="input-box" id="show_qr_box" style="display:none;">
+                                <span class="details">&nbsp;</span>
+                                <button type="button" class="ref_btn" id="show_qr_btn">Show QR</button>
+                            </div>
+                            <div class="input-box" id="qr_image_box" style="display:none;">
+                                <span class="details">UPI QR</span>
+                                <img
+                                    src="https://victoryschools.in/Victory/App%20Files/Images/Victory%20Edu%20Society%20QR.jpg"
+                                    alt="Victory Edu Society QR"
+                                    style="max-width:100%; width:220px; border-radius:8px; border:1px solid #dbe4ee; padding:6px; background:#fff;">
+                            </div>
+                        </div>
+                        <div class="button">
+                            <div class="btn-wrapper"
+                                <?php if (!can('create', MENU_ID)) { ?>
+                                title="You don't have permission to insert student data"
+                                <?php } ?>>
+                                <input type="submit" name="add" value="Insert" <?php echo !can('create', MENU_ID) ? 'disabled' : ''; ?> />
+                            </div>
+                            <input type="reset" value="Clear" />
+                        </div>
+                    </form>
                 </div>
             </div>
-            <div class="content" id="application_form" style="display: none;">
-                <div class="title">Student Personal Details</div>
-                <form id="app_form" action="" method="POST" onsubmit="return validateAndConfirm()">
-                    <input type="hidden" name="Branch_Hidden" id="branch_hidden">
-                    <input type="hidden" name="App_No" id="edit_app_no">
-                    <input type="hidden" name="force_insert" id="force_insert" value="0">
-                    <input type="hidden" name="User_Table" id="created_user_table">
-                    <div class="user-details">
-                        <div class="input-box" id="app_no_box" style="display:none;">
-                            <span class="details">Application No</span>
-                            <input type="text" id="display_app_no" readonly />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Full Name <span class="required">*</span></span>
-                            <input type="text" placeholder="Enter Fullname" id="first_name" name="First_Name" required />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Surname <span class="required">*</span></span>
-                            <input type="text" placeholder="Enter Surname" id="sur_name" name="Sur_Name" required />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Father Name <span class="required">*</span></span>
-                            <input type="text" placeholder="Enter Father Name" id="father_name" name="Father_Name" required />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Mother Name <span class="required">*</span></span>
-                            <input type="text" placeholder="Enter Mother Name" id="mother_name" name="Mother_Name" required />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Class Applied For <span class="required">*</span></span>
-                            <select name="Class_Applied" id="class_applied" required>
-                                <option value="" selected disabled>--Select Class Applied For --</option>
-                            </select>
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Previous Class <span class="required">*</span></span>
-                            <select name="Prev_Class" id="prev_class">
-                                <option value="" selected disabled>--Select Previous Class --</option>
-                            </select>
-                        </div>
-                        <div class="gender-details">
-                            <span class="gender-title">Gender <span class="required">*</span></span>
-                            <div class="category">
-                                <input type="radio" id="boy" value="Boy" name="Gender" required />
-                                <span><label for="boy">Boy</label></span>
-                                <input type="radio" id="girl" value="Girl" name="Gender" />
-                                <span><label for="girl">Girl</label></span>
-                            </div>
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Date Of Birth <span class="required">*</span></span>
-                            <input type="date" name="DOB" id="dob" required />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Mobile Number <span class="required">*</span></span>
-                            <input type="text" minlength="10" id="mobile" placeholder="Enter Mobile No." name="Mobile" required />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Aadhar Number
-                                <input type="text" placeholder="Enter Aadhar No." id="aadhar" maxlength="12" name="Aadhar" />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Mother Aadhar Number
-                                <input type="text" placeholder="Enter Mother Aadhar No." id="mother_aadhar" maxlength="12" name="Mother_Aadhar" />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Father Aadhar Number
-                                <input type="text" placeholder="Enter Father Aadhar No." id="father_aadhar" maxlength="12" name="Father_Aadhar" />
-                        </div>
-                    </div>
-                    <div class="title">Student Address Details</div>
-                    <div class="user-details">
-                        <div class="gender-details">
-                            <span class="gender-title">Religion <span class="required">*</span></span>
-                            <div class="category">
-                                <input type="radio" id="indian-hindu" value="Indian-Hindu" name="Religion" required />
-                                <span><label for="indian-hindu">Indian-Hindu</label></span>
-                                <input type="radio" id="indian-islam" value="Indian-Islam" name="Religion" />
-                                <span><label for="indian-islam">Indian-islam</label></span>
-                                <input type="radio" id="indian-christian" value="Indian-Christian" name="Religion" />
-                                <span><label for="indian-christian">Indian-Christian</label></span>
-                            </div>
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Caste <span class="required">*</span></span>
-                            <input type="text" placeholder="Enter Caste" name="Caste" id="caste" required />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Category <span class="required">*</span></span>
-                            <select name="Category" id="category" required>
-                                <option value="" selected disabled>--Select Category--</option>
-                                <option value="OC">OC</option>
-                                <option value="BC">BC</option>
-                                <option value="ST">ST</option>
-                                <option value="SC">SC</option>
-                                <option value="Mi">Mi</option>
-                            </select>
-                        </div>
-                        <div class="input-box">
-                            <span class="details">House No.
-                                <input type="text" placeholder="Enter House No." id="house_no" name="House_No" />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Street<span class="required">*</span></span>
-                            <input type="text" placeholder="Enter Area" name="Area" id="area" required />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Village/Town <span class="required">*</span></span>
-                            <input type="text" placeholder="Enter Village" name="Village" id="village" required />
-                        </div>
-                    </div>
-                    <div class="title">Other Details</div>
-                    <div class="user-details">
-                        <div class="gender-details">
-                            <span class="gender-title">Student Type <span class="required">*</span></span>
-                            <div class="category">
-                                <input type="radio" id="day_scholar" value="Day Scholar" name="Student_Type" required />
-                                <span><label for="day_scholar">Day Scholar</label></span>
-                                <input type="radio" id="hosteller" value="Hosteller" name="Student_Type" />
-                                <span id="hosteller_label"><label for="hosteller">Hosteller</label></span>
-                                <input type="radio" id="vanner" value="Vanner" name="Student_Type" />
-                                <span><label for="vanner">Vanner</label></span>
-                            </div>
-                        </div>
-                        <div class="gender-details">
-                            <span class="gender-title">Referred By Type <span class="required">*</span></span>
-                            <div class="category">
-                                <input type="radio" id="staff" value="Staff" name="Referred_By_Type" checked />
-                                <span><label for="staff">Staff</label></span>
+            <div id="success_container" style="display:none;">
+                <div style="background:#16a34a;color:#fff;padding:20px;border-radius:10px;margin-top:20px;text-align:center;">
 
-                                <input type="radio" id="non-staff" value="Non-Staff" name="Referred_By_Type" />
-                                <span><label for="non-staff">Non-Staff</label></span>
-                            </div>
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Van Route</span>
-                            <select class="form-control" name="Van_Route" id="van_route" disabled>
-                                <option value="">-- Select Route --</option>
-                                <?php
-                                $van_sql = mysqli_query($link, "SELECT Van_Route FROM `van_route` ORDER BY Van_Route");
-                                while ($van_row = mysqli_fetch_assoc($van_sql)) {
-                                    echo '<option value="' . $van_row['Van_Route'] . '" >' . $van_row['Van_Route'] . '</option>';
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Previous School</span>
-                            <input type="text" placeholder="Enter Previous School" id="previous_school" name="Previous_School" />
-                        </div>
-                        <!-- Staff Mode -->
-                        <div class="input-box" id="staff_referral_box">
-                            <span class="details">Referred By</span>
+                    <h3 id="success_title">Application Saved Successfully</h3>
 
-                            <button type="button" class="ref_btn" onclick="openReferralModal('create')">Select Staff</button>
+                    <p style="font-size:16px;margin-bottom:15px;">
+                        Application No: <strong id="success_app_no"></strong>
+                    </p>
 
-                            <div id="selected_user_display" style="margin-top:8px; font-weight:bold; display:none;"></div>
+                    <a id="success_pdf_link"
+                        href="#"
+                        target="_blank"
+                        style="display:inline-block;padding:10px 15px;background:#fff;color:#16a34a;border-radius:6px;text-decoration:none;font-weight:bold;">
+                        View / Download PDF
+                    </a>
 
-                            <!-- ✅ ONLY this goes to backend -->
-                            <input type="hidden" name="Referred_By" id="referred_by_hidden">
-                        </div>
-
-                        <!-- Non-Staff Mode -->
-                        <div class="input-box" id="nonstaff_referral_box" style="display:none;">
-                            <span class="details">Referred By</span>
-
-                            <input type="text" placeholder="Enter Referred By" id="referred_by_text" name="Referred_By" disabled>
-                        </div>
-                    </div>
-                    <?php if (can('custom1', MENU_ID)) { ?>
-                        <div id="application_status_section" style="display:none;">
-                            <div class="title">Application Status</div>
-                            <div class="user-details">
-
-                                <div class="input-box">
-                                    <span class="details">Status</span>
-                                    <select name="Status" id="status">
-                                        <option value="Active">Active</option>
-                                        <option value="Unjoined">Unjoined</option>
-                                        <option value="Rejected">Rejected</option>
-                                    </select>
-                                </div>
-
-                                <div class="input-box">
-                                    <span class="details">Reason</span>
-                                    <textarea class="form-control" id="status_reason" name="Status_Reason" rows="3" placeholder="Enter reason"></textarea>
-                                </div>
-
-                            </div>
-                        </div>
-                    <?php } ?>
-                    <div class="title">Payment Details</div>
-                    <div class="user-details">
-                        <div class="input-box">
-                            <span class="details">Advance Amount</span>
-                            <input type="number" placeholder="Enter Advance Amount" id="advance_amount" name="Advance_Amount" min="0" step="0.01" />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">DOP</span>
-                            <input type="date" id="dop" name="DOP" disabled />
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Payment Type</span>
-                            <select name="Payment_Type" id="payment_type" disabled>
-                                <option value="" selected>--Select Payment Type--</option>
-                                <option value="Cash">Cash</option>
-                                <option value="UPI">UPI</option>
-                            </select>
-                        </div>
-                        <div class="input-box">
-                            <span class="details">Transaction Id</span>
-                            <input type="text" placeholder="Enter Transaction Id" id="transaction_id" name="Transaction_Id" disabled />
-                        </div>
-                        <div class="input-box" id="show_qr_box" style="display:none;">
-                            <span class="details">&nbsp;</span>
-                            <button type="button" class="ref_btn" id="show_qr_btn">Show QR</button>
-                        </div>
-                        <div class="input-box" id="qr_image_box" style="display:none;">
-                            <span class="details">UPI QR</span>
-                            <img
-                                src="https://victoryschools.in/Victory/App%20Files/Images/Victory%20Edu%20Society%20QR.jpg"
-                                alt="Victory Edu Society QR"
-                                style="max-width:100%; width:220px; border-radius:8px; border:1px solid #dbe4ee; padding:6px; background:#fff;">
-                        </div>
-                    </div>
-                    <div class="button">
-                        <div class="btn-wrapper"
-                            <?php if (!can('create', MENU_ID)) { ?>
-                            title="You don't have permission to insert student data"
-                            <?php } ?>>
-                            <input type="submit" name="add" value="Insert" <?php echo !can('create', MENU_ID) ? 'disabled' : ''; ?> />
-                        </div>
-                        <input type="reset" value="Clear" />
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -874,27 +802,14 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                         <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#reportsFilterModal">
                             Filters
                         </button>
-                        <button type="button" class="btn btn-outline-light btn-sm" onclick="return false;" id="export">
-                            Export
-                        </button>
                         <button type="button" class="btn btn-outline-light btn-sm" onclick="getReports()">
                             Refresh
                         </button>
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive" id="table-container">
-                        <table hidden>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td style="font-size:30px;" colspan="4"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></td>
-                            </tr>
-                            <tr></tr>
-                        </table>
-                        <table class="table table-bordered table-striped mb-0" border="1">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>S.No</th>
@@ -910,15 +825,13 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                                     <th>Van_Route</th>
                                     <th>Previous_School</th>
                                     <th>Branch_Name</th>
-                                    <th>Referred_By</th>
-                                    <th>Status</th>
                                     <th>Created_At</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="reports_tbody">
                                 <tr>
-                                    <td colspan="17" class="text-center">No Reports Found</td>
+                                    <td colspan="15" class="text-center">No Reports Found</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1013,28 +926,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                             <input type="text" id="filter_previous_school" class="form-control" placeholder="Enter Previous School">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label d-block">Referred By Type</label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="filter_referred_by_type" id="filter_referred_staff" value="Staff" checked>
-                                <label class="form-check-label" for="filter_referred_staff">Staff</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="filter_referred_by_type" id="filter_referred_nonstaff" value="Non-Staff">
-                                <label class="form-check-label" for="filter_referred_nonstaff">Non-Staff</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4" id="filter_staff_referral_box" style="display:none;">
-                            <label class="form-label d-block">Referred By</label>
-                            <button type="button" class="ref_btn" onclick="openReferralModal('report_filter')">Select Staff</button>
-                            <div id="filter_selected_user_display" style="margin-top:8px; font-weight:bold; display:none;"></div>
-                            <input type="hidden" id="filter_referred_owner_id">
-                            <input type="hidden" id="filter_referred_owner_table">
-                        </div>
-                        <div class="col-md-4" id="filter_nonstaff_referral_box" style="display:none;">
-                            <label class="form-label">Referred By</label>
-                            <input type="text" id="filter_referred_by_text" class="form-control" placeholder="Enter Referred By">
-                        </div>
-                        <div class="col-md-4">
                             <label class="form-label">From_Date</label>
                             <input type="date" id="filter_from_date" class="form-control">
                         </div>
@@ -1051,43 +942,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             </div>
         </div>
     </div>
-
-    <!-- Staff Selection Modal -->
-    <div id="referral_modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000080;">
-        <div style="background:white; padding:20px; width:300px; margin:10% auto; border-radius:8px;">
-
-            <h3>Select Staff</h3>
-
-            <!-- Branch -->
-            <select id="modal_branch">
-                <option value="">Select Branch</option>
-                <?php
-                foreach ($branches as $branch_code => $branch_name) {
-                    echo '<option value="' . $branch_code . '">' . $branch_name . '</option>';
-                }
-                ?>
-            </select>
-
-            <!-- User Type -->
-            <select id="modal_user_type">
-                <option value="">Select Type</option>
-                <option value="Admin">Admin</option>
-                <option value="Faculty">Faculty</option>
-            </select>
-
-            <!-- Users -->
-            <select id="modal_user_list">
-                <option value="">Select User</option>
-            </select>
-
-            <br><br>
-
-            <input type="hidden" id="created_table">
-            <button class="ref_btn" onclick="selectUser()">Select</button>
-            <button class="cancel-btn" onclick="closeReferralModal()">Cancel</button>
-        </div>
-    </div>
-
     <!-- View Application Modal -->
     <div class="modal fade" id="viewModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -1110,10 +964,32 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
 
     <!-- Show Sections -->
     <script>
-        const loggedInUserId = <?php echo json_encode($_SESSION['Admin_Id_No'] ?? ''); ?>;
-        const canUpdate = <?php echo can('update', MENU_ID) ? 'true' : 'false'; ?>;
+        let currentMode = "FORM";
+
+        function handleSuccess(appNo, branch, mode) {
+            currentMode = "SUCCESS";
+
+            document.getElementById("form_container").style.display = "none";
+            document.getElementById("success_container").style.display = "block";
+
+            document.getElementById("success_app_no").innerText = appNo;
+
+            document.getElementById("success_title").innerText =
+                mode === "Create" ?
+                "Application Created Successfully" :
+                "Application Updated Successfully";
+
+            document.getElementById("success_pdf_link").href =
+                "https://victoryschools.in/Victory/Files/Applications/" +
+                branch + "/Application_" + appNo + ".pdf";
+        }
 
         function showSection(type) {
+            currentMode = "FORM";
+
+            document.getElementById("success_container").style.display = "none";
+            document.getElementById("form_container").style.display = "block";
+
             // Hide all
             document.getElementById("search_section").style.display = "none";
             document.getElementById("form_section").style.display = "none";
@@ -1133,13 +1009,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 let btn = document.querySelector('input[name="add"], input[name="update"]');
                 btn.name = 'add';
                 btn.value = 'Insert';
-                originalStatus = 'Active';
-                if (document.getElementById("application_status_section")) {
-                    document.getElementById("application_status_section").style.display = "none";
-                    document.getElementById("status").value = "Active";
-                    document.getElementById("status_reason").value = "";
-                }
-                handleStatusUI(originalStatus);
             } else if (type === "reports") {
                 document.getElementById("reports_section").style.display = "block";
                 getReports();
@@ -1253,173 +1122,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             radio.addEventListener("change", handleStudentTypeChange);
         });
     </script>
-
-    <!-- On Referred By Type Selection -->
-    <script>
-        const staffRadio = document.getElementById("staff");
-        const nonStaffRadio = document.getElementById("non-staff");
-
-        const staffBox = document.getElementById("staff_referral_box");
-        const nonStaffBox = document.getElementById("nonstaff_referral_box");
-
-        const hiddenInput = document.getElementById("referred_by_hidden");
-        const textInput = document.getElementById("referred_by_text");
-        const display = document.getElementById("selected_user_display");
-
-        // Modal elements
-        const modal = document.getElementById("referral_modal");
-        const modalBranch = document.getElementById("modal_branch");
-        const modalUserType = document.getElementById("modal_user_type");
-        const modalUserList = document.getElementById("modal_user_list");
-        let currentReferralMode = "create";
-
-
-        // 🔹 Toggle Staff / Non-Staff
-        function handleReferralType() {
-
-            if (staffRadio.checked) {
-                staffBox.style.display = "block";
-                nonStaffBox.style.display = "none";
-
-                // ✅ Enable staff hidden
-                hiddenInput.disabled = false;
-
-                // ❌ Disable non-staff input
-                textInput.disabled = true;
-                textInput.value = "";
-
-            } else {
-                staffBox.style.display = "none";
-                nonStaffBox.style.display = "block";
-
-                // ❌ Disable staff hidden
-                hiddenInput.disabled = true;
-                hiddenInput.value = "";
-
-                // ✅ Enable non-staff input
-                textInput.disabled = false;
-
-                document.getElementById('created_user_table').value = "";
-            }
-        }
-
-        staffRadio.addEventListener("change", handleReferralType);
-        nonStaffRadio.addEventListener("change", handleReferralType);
-
-
-        // 🔹 Modal
-        function openReferralModal(mode = "create") {
-            currentReferralMode = mode;
-
-            if (currentReferralMode === "report_filter") {
-                let reportsFilterModal = document.getElementById('reportsFilterModal');
-                let filterModal = bootstrap.Modal.getInstance(reportsFilterModal);
-                if (filterModal) {
-                    reportsFilterModal.addEventListener('hidden.bs.modal', function() {
-                        modal.style.display = "block";
-                    }, {
-                        once: true
-                    });
-                    filterModal.hide();
-                    return;
-                }
-            }
-
-            modal.style.display = "block";
-        }
-
-        function closeReferralModal() {
-            modal.style.display = "none";
-
-            if (currentReferralMode === "report_filter") {
-                let filterModal = new bootstrap.Modal(document.getElementById('reportsFilterModal'));
-                filterModal.show();
-            }
-        }
-
-
-        // 🔹 Load Users
-        function loadUsers() {
-            modalUserList.innerHTML = '<option value="">Select User</option>';
-
-            const branch = modalBranch.value;
-            const type = modalUserType.value;
-
-            if (!branch || !type) return;
-
-            $.ajax({
-                url: '',
-                method: 'post',
-                data: {
-                    Action: "Get_User_List",
-                    Branch: branch,
-                    Type: type
-                },
-                success: function(raw_data) {
-                    try {
-                        let data = JSON.parse(raw_data);
-                        let usersList = data['User_List'];
-                        let user_table = data['Owner_Table'];
-
-                        if (usersList.length == 0) {
-                            alert('No Users Found');
-                        } else {
-                            document.getElementById('created_table').value = user_table;
-                            usersList.forEach(u => {
-                                if (u.Id_No != "APPADMIN") {
-                                    let opt = document.createElement("option");
-                                    opt.value = u.Id_No;
-                                    opt.textContent = u.Id_No + " - " + u.Name;
-                                    modalUserList.appendChild(opt);
-                                }
-                            });
-                        }
-
-                    } catch (err) {
-                        console.log(err);
-                    }
-                }
-            });
-        }
-
-        modalBranch.addEventListener("change", loadUsers);
-        modalUserType.addEventListener("change", loadUsers);
-
-
-        // 🔹 Select User
-        function selectUser() {
-            const selectedOption = modalUserList.options[modalUserList.selectedIndex];
-            const user_table = document.getElementById('created_table').value;
-
-            if (!selectedOption.value) return alert("Select a user");
-
-            const id = selectedOption.value;
-            const name = selectedOption.textContent.split(" - ")[1];
-
-            const combined = id + " - " + name;
-
-            if (currentReferralMode === "report_filter") {
-                document.getElementById('filter_referred_owner_id').value = id;
-                document.getElementById('filter_referred_owner_table').value = user_table;
-                document.getElementById('filter_selected_user_display').style.display = 'block';
-                document.getElementById('filter_selected_user_display').textContent = "Selected: " + combined;
-
-                closeReferralModal();
-                return;
-            }
-
-            // ✅ Store
-            hiddenInput.value = combined;
-
-            // ✅ Show
-            display.style.display = 'block';
-            display.textContent = combined;
-            created_user_table.value = user_table;
-
-            closeReferralModal();
-        }
-    </script>
-
     <!-- Class_Applied,Prev_Class Validation -->
     <script>
         const classApplied = document.getElementById("class_applied");
@@ -1448,49 +1150,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         const showQrBox = document.getElementById("show_qr_box");
         const qrImageBox = document.getElementById("qr_image_box");
         const showQrBtn = document.getElementById("show_qr_btn");
-        let originalStatus = 'Active';
-
-        function handleStatusUI(currentStatus) {
-
-            let status = document.getElementById("status");
-            let reason = document.getElementById("status_reason");
-
-            if (!status || !reason) {
-                return;
-            }
-
-            let selected = status.value;
-
-            // Reset
-            reason.disabled = true;
-            reason.removeAttribute("required");
-
-            // Lock if not Active
-            if (currentStatus !== "Active") {
-                status.disabled = true;
-                reason.disabled = false;
-                reason.setAttribute("readonly", true);
-                return;
-            }
-
-            // Active -> editable
-            status.disabled = false;
-            reason.removeAttribute("readonly");
-
-            if (selected === "Unjoined" || selected === "Rejected") {
-                reason.disabled = false;
-                reason.setAttribute("required", true);
-            } else {
-                reason.value = "";
-                reason.disabled = true;
-            }
-        }
-
-        if (document.getElementById("status")) {
-            document.getElementById("status").addEventListener("change", function() {
-                handleStatusUI(originalStatus);
-            });
-        }
 
         function resetPaymentFields() {
             dopInput.value = "";
@@ -1541,16 +1200,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         syncPaymentSection();
 
         function validateAndConfirm() {
-            if (staffRadio.checked && !hiddenInput.value) {
-                alert("Please select staff");
-                return false;
-            }
-
-            if (nonStaffRadio.checked && !textInput.value.trim()) {
-                alert("Please enter referred by");
-                return false;
-            }
-
             const amount = parseFloat(advanceAmountInput.value);
             if (advanceAmountInput.value && !isNaN(amount) && amount > 0) {
                 if (!dopInput.value) {
@@ -1571,36 +1220,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
 
             let submitBtn = document.querySelector('input[name="add"], input[name="update"]');
             let confirmText = submitBtn && submitBtn.name === "update" ? 'Confirm to Update Student Data?' : 'Confirm to Add Student Data?';
-
-            if (submitBtn && submitBtn.name === "update" && document.getElementById("status")) {
-                let statusInput = document.getElementById("status");
-                let status = statusInput.disabled ? originalStatus : statusInput.value;
-                let reason = document.getElementById("status_reason").value.trim();
-
-                // Transition validation
-                if (originalStatus !== "Active" && status !== originalStatus) {
-                    alert("Status cannot be changed");
-                    return false;
-                }
-
-                if (originalStatus === "Active" && !["Active", "Unjoined", "Rejected"].includes(status)) {
-                    alert("Invalid status change");
-                    return false;
-                }
-
-                // Reason validation
-                if ((status === "Unjoined" || status === "Rejected") && !reason) {
-                    alert("Reason required");
-                    return false;
-                }
-
-                // Confirmation popup
-                if (originalStatus !== status) {
-                    if (!confirm(`Change status from ${originalStatus} to ${status}?`)) {
-                        return false;
-                    }
-                }
-            }
 
             if (!confirm(confirmText)) {
                 return false;
@@ -1656,13 +1275,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             return formatted.replace(/\//g, "-");
         }
 
-        function decodeHtmlEntities(value) {
-            if (!value) return "";
-            let textarea = document.createElement("textarea");
-            textarea.innerHTML = value;
-            return textarea.value;
-        }
-
         function cleanFilters(obj) {
             let cleaned = {};
             for (let key in obj) {
@@ -1672,93 +1284,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             }
             return cleaned;
         }
-
-        function canEditApplication(row) {
-            return String(row.Created_By_Id || '') === String(loggedInUserId || '') || canUpdate;
-        }
-
-        function renderEditButton(row, enabledOnclick) {
-            if (canEditApplication(row)) {
-                const safeOnclick = enabledOnclick.replace(/'/g, '&#39;');
-                return `<button class="btn btn-sm btn-outline-primary" onclick='${safeOnclick}'>Edit</button>`;
-            }
-
-            return `
-                <span onclick="alert('You are not allowed to edit this application')"
-                      title="You don't have permission to edit this application"
-                      style="display:inline-block; cursor:not-allowed;">
-                    <button class="btn btn-sm btn-outline-primary"
-                            disabled
-                            style="cursor:not-allowed; pointer-events:none;"
-                            title="You don't have permission to edit this application">
-                        Edit
-                    </button>
-                </span>
-            `;
-        }
-
-        function renderJoinAsStudentButton(row) {
-            const status = row.Status || '';
-            const branch = row.Branch || '';
-            const appNo = String(row.App_No || '').replace(/"/g, '&quot;');
-            const isEligible = status === 'Active' && branch === 'VHS';
-            let tooltip = '';
-
-            if (status === 'Joined') {
-                tooltip = 'Already converted to student';
-            } else if (status !== 'Active') {
-                tooltip = 'Only Active applications can be converted';
-            } else if (branch !== 'VHS') {
-                tooltip = 'This application belongs to another branch';
-            }
-
-            const disabledAttrs = !isEligible ? `disabled style="cursor:not-allowed;" title="${tooltip}"` : '';
-
-            return `
-                <form method="POST" action="/Futuregen/Admin/Student/Stu_Register.php" style="display:inline;">
-                    <input type="hidden" name="app_id" value="${appNo}">
-                    <button type="submit" class="btn btn-sm btn-outline-primary" ${disabledAttrs}>
-                        Join as Student
-                    </button>
-                </form>
-            `;
-        }
-
-        const filterReferredStaff = document.getElementById('filter_referred_staff');
-        const filterReferredNonStaff = document.getElementById('filter_referred_nonstaff');
-        const filterStaffReferralBox = document.getElementById('filter_staff_referral_box');
-        const filterNonStaffReferralBox = document.getElementById('filter_nonstaff_referral_box');
-        const filterReferredOwnerId = document.getElementById('filter_referred_owner_id');
-        const filterReferredOwnerTable = document.getElementById('filter_referred_owner_table');
-        const filterSelectedUserDisplay = document.getElementById('filter_selected_user_display');
-        const filterReferredByText = document.getElementById('filter_referred_by_text');
-
-        function handleReportReferralType() {
-            if (filterReferredStaff.checked) {
-                filterStaffReferralBox.style.display = "block";
-                filterNonStaffReferralBox.style.display = "none";
-                filterReferredByText.value = "";
-            } else if (filterReferredNonStaff.checked) {
-                filterStaffReferralBox.style.display = "none";
-                filterNonStaffReferralBox.style.display = "block";
-                filterReferredOwnerId.value = "";
-                filterReferredOwnerTable.value = "";
-                filterSelectedUserDisplay.textContent = "";
-                filterSelectedUserDisplay.style.display = "none";
-            } else {
-                filterStaffReferralBox.style.display = "none";
-                filterNonStaffReferralBox.style.display = "none";
-                filterReferredByText.value = "";
-                filterReferredOwnerId.value = "";
-                filterReferredOwnerTable.value = "";
-                filterSelectedUserDisplay.textContent = "";
-                filterSelectedUserDisplay.style.display = "none";
-            }
-        }
-
-        filterReferredStaff.addEventListener("change", handleReportReferralType);
-        filterReferredNonStaff.addEventListener("change", handleReportReferralType);
-        handleReportReferralType();
 
         function collectReportFilters() {
             reportFilters = {
@@ -1772,10 +1297,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 area: document.getElementById('filter_area').value.trim(),
                 village: document.getElementById('filter_village').value.trim(),
                 previousSchool: document.getElementById('filter_previous_school').value.trim(),
-                referredByType: document.querySelector('input[name="filter_referred_by_type"]:checked')?.value || '',
-                referredOwnerId: document.getElementById('filter_referred_owner_id').value,
-                referredOwnerTable: document.getElementById('filter_referred_owner_table').value,
-                referredByText: document.getElementById('filter_referred_by_text').value.trim(),
                 fromDate: document.getElementById('filter_from_date').value,
                 toDate: document.getElementById('filter_to_date').value
             };
@@ -1794,7 +1315,8 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                     },
                     body: JSON.stringify({
                         Action: 'Get_Reports',
-                        filters: filters
+                        filters: filters,
+                        username: '<?php echo $_SESSION['Id_No']; ?>'
                     })
                 })
                 .then(res => res.json())
@@ -1819,7 +1341,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             reportRows = data;
 
             if (!data.length) {
-                tbody.innerHTML = '<tr><td colspan="17" class="text-center">No Reports Found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="15" class="text-center">No Reports Found</td></tr>';
                 return;
             }
 
@@ -1839,15 +1361,12 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                         <td>${row.Van_Route || ''}</td>
                         <td>${row.Previous_School || ''}</td>
                         <td>${row.Branch_Name || ''}</td>
-                        <td>${row.Referred_By || ''}</td>
-                        <td>${row.Status || ''}</td>
                         <td style="white-space:nowrap;">${formatDate(row.Created_At)}</td>
                         <td>
                             <div class="d-flex gap-2">
                                 <button class="btn btn-sm btn-outline-success" onclick="openPDF('${row.Branch}', '${row.App_No}')">PDF</button>
                                 <button class="btn btn-sm btn-outline-dark" onclick="viewReportApplication(${index})">View</button>
-                                ${renderEditButton(row, `editReportApplication(${index})`)}
-                                ${renderJoinAsStudentButton(row)}
+                                <button class="btn btn-sm btn-outline-primary" onclick="editReportApplication(${index})">Edit</button>
                             </div>
                         </td>
                     </tr>
@@ -1880,12 +1399,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 }
             });
             reportFilters = {};
-            filterSelectedUserDisplay.textContent = "";
-            filterSelectedUserDisplay.style.display = "none";
-            filterReferredOwnerId.value = "";
-            filterReferredOwnerTable.value = "";
-            filterReferredByText.value = "";
-            handleReportReferralType();
         }
 
         function applyReportFilters() {
@@ -1942,21 +1455,10 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             document.getElementById("dop").value = row.DOP ? formatDate(row.DOP, "input") : "";
             document.getElementById("payment_type").value = row.Payment_Type || "";
             document.getElementById("transaction_id").value = row.Transaction_Id || "";
-            document.getElementById("created_user_table").value = row.Owner_Table || "";
-            originalStatus = row.Status || 'Active';
-
-            if (document.getElementById("application_status_section")) {
-                document.getElementById("application_status_section").style.display = "block";
-                document.getElementById("status").value = originalStatus;
-                document.getElementById("status_reason").value = decodeHtmlEntities(row.Status_Reason || '');
-            }
-
-            handleStatusUI(originalStatus);
 
             document.querySelectorAll('input[name="Gender"]').forEach(radio => radio.checked = false);
             document.querySelectorAll('input[name="Religion"]').forEach(radio => radio.checked = false);
             document.querySelectorAll('input[name="Student_Type"]').forEach(radio => radio.checked = false);
-            document.querySelectorAll('input[name="Referred_By_Type"]').forEach(radio => radio.checked = false);
 
             if (row.Gender === "Boy") {
                 document.getElementById("boy").checked = true;
@@ -1980,29 +1482,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 document.getElementById("vanner").checked = true;
             }
 
-            hiddenInput.value = "";
-            textInput.value = "";
-            display.textContent = "";
-            display.style.display = "none";
-
-            if (row.Owner_Id && row.Owner_Table) {
-                staffRadio.checked = true;
-                handleReferralType();
-
-                referred_by_hidden.value = row.Owner_Id + " - " + row.Referred_By;
-                selected_user_display.textContent = referred_by_hidden.value;
-                selected_user_display.style.display = 'block';
-
-                created_user_table.value = row.Owner_Table;
-            } else {
-                nonStaffRadio.checked = true;
-                handleReferralType();
-
-                referred_by_text.value = row.Referred_By || "";
-            }
-
             handleStudentTypeChange();
-            handleReferralType();
             syncPaymentSection();
             handleClassDependency();
 
@@ -2087,8 +1567,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                                     ${row('Van Route', data.Van_Route)}
                                     ${row('Branch', data.Branch_Name)}
                                     ${row('Referred By', data.Referred_By)}
-                                    ${row('Status', data.Status)}
-                                    ${row('Status Reason', data.Status_Reason)}
                                     ${row('Created', formatDate(data.Created_At))}
                                 </tbody>
                             </table>
@@ -2203,7 +1681,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                                                                     <th>Class Applied</th>
                                                                     <th>Branch</th>
                                                                     <th>Referred By</th>
-                                                                    <th>Status</th>
                                                                     <th>Created Date</th>
                                                                     <th>Actions</th>
                                                                 </tr>
@@ -2212,6 +1689,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                                         `;
 
                             res.data.forEach(function(row, index) {
+                                const canEdit = row.Owner_Id == '<?php echo $_SESSION['Id_No']; ?>';
 
                                 html += `
                                             <tr>
@@ -2225,7 +1703,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                                                 <td style="white-space:nowrap;">${row.Class_Applied || ''}</td>
                                                 <td>${row.Branch_Name || ''}</td>
                                                 <td>${row.Referred_By || ''}</td>
-                                                <td>${row.Status || ''}</td>
                                                 <td style="white-space:nowrap;">${formatDate(row.Created_At)}</td>
                                                 <td>
                                                     <div class="d-flex gap-2">
@@ -2237,15 +1714,18 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                                                         </button>
 
                                                         <!-- ✏️ Edit -->
-                                                        ${renderEditButton(row, `editApplication(${JSON.stringify(row)})`)}
+                                                        ${canEdit ? `<button class="btn btn-sm btn-outline-primary"
+                                                                onclick='editApplication(${JSON.stringify(row)})'>
+                                                            Edit
+                                                        </button>` : `<button class="btn btn-sm btn-outline-primary" title="You Cannot Edit Others Application" onclick="alert('You Cannot Edit Others Application');" style="opacity:0.5;cursor:not-allowed;">
+                                                            Edit
+                                                        </button>`}
 
                                                         <!-- 📤 Share -->
                                                         <button class="btn btn-sm btn-outline-success"
                                                                 onclick="shareApplication('${row.Branch}', '${row.App_No}')">
                                                             PDF
                                                         </button>
-
-                                                        ${renderJoinAsStudentButton(row)}
 
                                                     </div>
                                                 </td>
@@ -2279,40 +1759,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
 
             });
 
-        });
-    </script>
-
-    <!-- Export Table to Excel -->
-    <script type="text/javascript">
-        $('#export').on('click', function() {
-            filename = "Applications_Report";
-            var downloadLink;
-            var dataType = 'application/vnd.ms-excel';
-            var tableSelect = document.getElementById('table-container');
-            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
-            // Specify file name
-            filename = filename ? filename + '.xls' : 'excel_data.xls';
-
-            // Create download link element
-            downloadLink = document.createElement("a");
-
-            document.body.appendChild(downloadLink);
-
-            if (navigator.msSaveOrOpenBlob) {
-                var blob = new Blob(['\ufeff', tableHTML], {
-                    type: dataType
-                });
-                navigator.msSaveOrOpenBlob(blob, filename);
-            } else {
-                // Create a link to the file
-                downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
-
-                // Setting the file name
-                downloadLink.download = filename;
-
-                //triggering the function
-                downloadLink.click();
-            }
         });
     </script>
 
@@ -2352,12 +1798,10 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 return $d->format('d/m/Y');
         }
     }
-
     function dbValue($val)
     {
         return ($val === null || $val === '') ? "NULL" : "'" . $val . "'";
     }
-
     if (isset($_POST['add'])) {
         $branch = validate($_POST['Branch'] ?? $_POST['Branch_Hidden'] ?? '');
         $first_name = validate($_POST['First_Name']);
@@ -2379,16 +1823,14 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         $area = validate($_POST['Area']);
         $village = validate($_POST['Village']);
         $student_type = validate($_POST['Student_Type']);
-        $referred_by_type = validate($_POST['Referred_By_Type']);
         $previous_school = isset($_POST['Previous_School']) && $_POST['Previous_School'] != "" ? validate($_POST['Previous_School']) : null;
         $van_route = isset($_POST['Van_Route']) && $_POST['Van_Route'] != "" ? validate($_POST['Van_Route']) : null;
-        $referred_by_raw = validate($_POST['Referred_By'] ?? '');
-        $created_user_table = validate($_POST['User_Table']);
         $force_insert = $_POST['force_insert'] ?? '0';
         $advance_amount_raw = trim($_POST['Advance_Amount'] ?? '');
         $dop = isset($_POST['DOP']) && $_POST['DOP'] != "" ? validate($_POST['DOP']) : null;
         $payment_type = isset($_POST['Payment_Type']) && $_POST['Payment_Type'] != "" ? validate($_POST['Payment_Type']) : null;
         $transaction_id = isset($_POST['Transaction_Id']) && $_POST['Transaction_Id'] != "" ? validate($_POST['Transaction_Id']) : null;
+
         if ($advance_amount_raw === '' || (is_numeric($advance_amount_raw) && (float)$advance_amount_raw <= 0)) {
             $advance_amount = null;
             $dop = null;
@@ -2439,32 +1881,14 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         if ($student_type == "Vanner") {
             echo "<script>van_route.disabled='';</script>";
         }
-        // Referred_By
-        if ($referred_by_type == "Staff") {
-            $parts = explode('-', $referred_by_raw, 2);
-            $owner_id = trim($parts[0]);
-            $referred_by_name = trim($parts[1]);
-            $owner_table = $created_user_table;
-            echo "<script>
-                selected_user_display.style.display='block';
-                selected_user_display.textContent='{$referred_by_raw}';
-                document.getElementById('referred_by_hidden').value = '{$referred_by_raw}';
-            </script>";
-        } else {
-            $owner_id = null;
-            $owner_table = null;
-            $referred_by_name = $referred_by_raw;
-            echo "<script>
-                selected_user_display.style.display='none';
-                document.getElementById('referred_by_text').value = '{$referred_by_raw}';
-            </script>";
-        }
+        $owner_id = $_SESSION['Id_No'];
+        $owner_table = 'futuregen_db.employee_master_data';
+        $referred_by_name = $_SESSION['Faculty_Name'];
 
         echo "
         <script>
             document.getElementById('branch_select').value = '{$branch}';
             document.getElementById('branch_hidden').value = '{$branch}';
-            document.getElementById('created_user_table').value = '{$created_user_table}';
             document.getElementById('force_insert').value = '{$force_insert}';
             document.getElementById('first_name').value = '{$first_name}';
             document.getElementById('sur_name').value = '{$sur_name}';
@@ -2485,7 +1909,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             document.getElementById('area').value = '{$area}';
             document.getElementById('village').value = '{$village}';
             document.getElementById('" . str_replace(' ', '_', strtolower($student_type)) . "').checked = true;
-            document.getElementById('" . strtolower($referred_by_type) . "').checked = true;
             document.getElementById('previous_school').value = '{$previous_school}';
             document.getElementById('van_route').value = '{$van_route}';
             document.getElementById('advance_amount').value = '{$advance_amount}';
@@ -2503,7 +1926,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 document.querySelectorAll('.seg-btn').forEach(btn => btn.classList.remove('active'));
                 document.querySelectorAll('.seg-btn')[1].classList.add('active');
                 application_form.style.display = 'block';
-                handleReferralType();
                 syncPaymentSection();
             </script>";
 
@@ -2602,17 +2024,22 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             $seq = str_pad($newSeq, 3, "0", STR_PAD_LEFT);
             $appNo = "APP{$branch}{$year}{$seq}";
 
-            $created_by_id = $_SESSION['Admin_Id_No'];
-            $created_by_name = $_SESSION['Admin_Name'];
-            $created_by_table = "futuregen_db.admin";
-            $created_user_type = "Admin";
+            $created_by_id = $_SESSION['Id_No'];
+            $created_by_name = $_SESSION['Faculty_Name'];
+            $created_by_table = "futuregen.employee_master_data";
+            $created_user_type = "Faculty";
             $created_source = "Website";
+
+            $owner_id = $_SESSION['Id_No'];
+            $owner_table = 'futuregen.employee_master_data';
+            $referred_by_name = $_SESSION['Faculty_Name'];
 
             $insert_query = "INSERT INTO central.applications(App_No, First_Name, Sur_Name, Father_Name, Mother_Name, Class_Applied, Prev_Class, Gender, DOB, Mobile, Aadhar, Mother_Aadhar, Father_Aadhar, Religion, Caste, Category, House_No, Area, Village, Student_Type, Branch, Previous_School, Van_Route, Owner_Id, Owner_Table, Referred_By, Advance_Amount, DOP, Payment_Type, Transaction_Id, Created_By_Id, Created_By_Name, Created_By_Table, Created_User_Type, Created_Source, Created_At) VALUES ('$appNo','$first_name','$sur_name','$father_name','$mother_name','$class_applied'," . dbValue($prev_class) . ",'$gender','$dob','$mobile'," . dbValue($aadhar) . "," . dbValue($mother_aadhar) . "," . dbValue($father_aadhar) . ",'$religion','$caste','$category'," . dbValue($house_no) . ",'$area','$village','$student_type','$branch'," . dbValue($previous_school) . "," . dbValue($van_route) . "," . dbValue($owner_id) . "," . dbValue($owner_table) . ",'$referred_by_name'," . dbValue($advance_amount) . "," . dbValue($dop) . "," . dbValue($payment_type) . "," . dbValue($transaction_id) . ",'$created_by_id','$created_by_name','$created_by_table','$created_user_type','$created_source',NOW())";
 
             // Inserting Application
             if (mysqli_query($link, $insert_query)) {
                 mysqli_commit($link);
+                $nodeResponse = [];
                 try {
                     $details = [
                         "First_Name" => $first_name,
@@ -2644,7 +2071,16 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                         "DOP" => $dop,
                         "Payment_Type" => $payment_type,
                         "Transaction_Id" => $transaction_id,
+                        "App_No" => $appNo,
                     ];
+
+                    $details['Referred_By'] = $_SESSION['Faculty_Name'];
+                    $details['Owner_Id'] = $_SESSION['Id_No'];
+                    $details['Owner_Table'] = 'futuregen_db.employee_master_data';
+                    $details['Created_By_Id'] = $_SESSION['Id_No'];
+                    $details['Created_By_Name'] = $_SESSION['Faculty_Name'];
+                    $details['Created_By_Table'] = 'futuregen_db.employee_master_data';
+                    $details['Created_User_Type'] = 'Faculty';
 
                     $nodeUrl = "http://192.168.1.115:3000/generateapplicationpdf";
 
@@ -2685,10 +2121,15 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                     error_log("PDF Generation Failed: " . $e->getMessage());
                 }
 
-                echo "<script>
-                        alert('Application Created Successfully! App No: {$appNo}');
-                        window.location = window.location.href;
-                    </script>";
+                $appNo = $nodeResponse['App_No'] ?? $details['App_No'];
+                $branch = $details['Branch'];
+                $mode = 'Create';
+    ?>
+                <script>
+                    handleSuccess('<?php echo $appNo; ?>', '<?php echo $branch; ?>', '<?php echo $mode; ?>');
+                    document.getElementById("app_form").reset();
+                </script>
+            <?php
             } else {
                 mysqli_rollback($link);
 
@@ -2696,7 +2137,6 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             }
         }
     }
-
     if (isset($_POST['update'])) {
         $appNo = validate($_POST['App_No'] ?? '');
         $branch = validate($_POST['Branch'] ?? $_POST['Branch_Hidden'] ?? '');
@@ -2719,19 +2159,13 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         $area = validate($_POST['Area']);
         $village = validate($_POST['Village']);
         $student_type = validate($_POST['Student_Type']);
-        $referred_by_type = validate($_POST['Referred_By_Type']);
         $previous_school = isset($_POST['Previous_School']) && $_POST['Previous_School'] != "" ? validate($_POST['Previous_School']) : null;
         $van_route = isset($_POST['Van_Route']) && $_POST['Van_Route'] != "" ? validate($_POST['Van_Route']) : null;
-        $referred_by_raw = validate($_POST['Referred_By'] ?? '');
-        $created_user_table = validate($_POST['User_Table']);
         $force_insert = $_POST['force_insert'] ?? '0';
         $advance_amount_raw = trim($_POST['Advance_Amount'] ?? '');
         $dop = isset($_POST['DOP']) && $_POST['DOP'] != "" ? validate($_POST['DOP']) : null;
         $payment_type = isset($_POST['Payment_Type']) && $_POST['Payment_Type'] != "" ? validate($_POST['Payment_Type']) : null;
         $transaction_id = isset($_POST['Transaction_Id']) && $_POST['Transaction_Id'] != "" ? validate($_POST['Transaction_Id']) : null;
-        $status = validate($_POST['Status'] ?? 'Active');
-        $reason = validate($_POST['Status_Reason'] ?? '');
-        $canManageApplicationStatus = can('can_custom1', MENU_ID);
 
         if ($advance_amount_raw === '' || (is_numeric($advance_amount_raw) && (float)$advance_amount_raw <= 0)) {
             $advance_amount = null;
@@ -2787,29 +2221,12 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         if ($student_type == "Vanner") {
             echo "<script>van_route.disabled='';</script>";
         }
-        if ($referred_by_type == "Staff") {
-            $parts = explode('-', $referred_by_raw, 2);
-            $owner_id = trim($parts[0]);
-            $referred_by_name = trim($parts[1] ?? '');
-            $owner_table = $created_user_table;
-            echo "<script>
-                selected_user_display.style.display='block';
-                selected_user_display.textContent='{$referred_by_raw}';
-                document.getElementById('referred_by_hidden').value = '{$referred_by_raw}';
-            </script>";
-        } else {
-            $owner_id = null;
-            $owner_table = null;
-            $referred_by_name = $referred_by_raw;
-            echo "<script>
-                selected_user_display.style.display='none';
-                document.getElementById('referred_by_text').value = '{$referred_by_raw}';
-            </script>";
-        }
+        $owner_id = $_SESSION['Id_No'];
+        $owner_table = 'futuregen_db.employee_master_data';
+        $referred_by_name = $_SESSION['Faculty_Name'];
 
         echo "
         <script>
-            document.getElementById('created_user_table').value = '{$created_user_table}';
             document.getElementById('force_insert').value = '{$force_insert}';
             document.getElementById('first_name').value = '{$first_name}';
             document.getElementById('sur_name').value = '{$sur_name}';
@@ -2830,23 +2247,15 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             document.getElementById('area').value = '{$area}';
             document.getElementById('village').value = '{$village}';
             document.getElementById('" . str_replace(' ', '_', strtolower($student_type)) . "').checked = true;
-            document.getElementById('" . strtolower($referred_by_type) . "').checked = true;
             document.getElementById('previous_school').value = '{$previous_school}';
             document.getElementById('van_route').value = '{$van_route}';
             document.getElementById('advance_amount').value = '{$advance_amount}';
             document.getElementById('dop').value = '{$dop}';
             document.getElementById('payment_type').value = '{$payment_type}';
             document.getElementById('transaction_id').value = '{$transaction_id}';
-            if (document.getElementById('application_status_section')) {
-                document.getElementById('application_status_section').style.display = 'block';
-                document.getElementById('status').value = '{$status}';
-                document.getElementById('status_reason').value = " . json_encode(html_entity_decode($reason, ENT_QUOTES, 'UTF-8')) . ";
-            }
             handleStudentTypeChange();
-            handleReferralType();
             syncPaymentSection();
             handleClassDependency();
-            handleStatusUI(originalStatus);
         </script>";
 
         echo "<script>
@@ -2856,61 +2265,11 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 document.querySelectorAll('.seg-btn').forEach(btn => btn.classList.remove('active'));
                 document.querySelectorAll('.seg-btn')[1].classList.add('active');
                 application_form.style.display = 'block';
-                handleReferralType();
                 syncPaymentSection();
             </script>";
 
         if (!$appNo) {
             echo "<script>alert('Invalid Application No');</script>";
-            return;
-        }
-
-        $currentStatusQuery = mysqli_query($link, "SELECT Status, Status_Reason, Created_By_Id FROM central.applications WHERE App_No = '$appNo'");
-        $currentRow = mysqli_fetch_assoc($currentStatusQuery);
-        if (!$currentRow) {
-            echo "<script>alert('Application Not Found');</script>";
-            return;
-        }
-
-        $loggedInAdminId = $_SESSION['Admin_Id_No'];
-        $canUpdateApplication = can('update', MENU_ID);
-
-        if ($currentRow['Created_By_Id'] != $loggedInAdminId && !$canUpdateApplication) {
-            echo "<script>alert('You are not allowed to edit this application');</script>";
-            return;
-        }
-
-        $currentStatus = $currentRow['Status'];
-        $currentReason = $currentRow['Status_Reason'];
-
-        if (!$canManageApplicationStatus) {
-            $status = $currentStatus;
-            $reason = $currentReason;
-        } else if (!isset($_POST['Status'])) {
-            $status = $currentStatus;
-        }
-
-        echo "<script>
-            originalStatus = '{$currentStatus}';
-            if (document.getElementById('status')) {
-                document.getElementById('status').value = '{$status}';
-                document.getElementById('status_reason').value = " . json_encode(html_entity_decode($reason, ENT_QUOTES, 'UTF-8')) . ";
-            }
-            handleStatusUI(originalStatus);
-        </script>";
-
-        if ($currentStatus !== 'Active' && $status !== $currentStatus) {
-            echo "<script>alert('Status cannot be changed');</script>";
-            return;
-        }
-
-        if ($currentStatus === 'Active' && !in_array($status, ['Active', 'Unjoined', 'Rejected'])) {
-            echo "<script>alert('Invalid status change');</script>";
-            return;
-        }
-
-        if (in_array($status, ['Unjoined', 'Rejected']) && empty($reason)) {
-            echo "<script>alert('Reason required');</script>";
             return;
         }
 
@@ -2961,14 +2320,19 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             echo "<script>alert('Application Not Found');</script>";
             return;
         } else {
-            $updated_by_id = $_SESSION['Admin_Id_No'];
-            $updated_by_name = $_SESSION['Admin_Name'];
-            $updated_by_table = "futuregen_db.admin";
-            $updated_user_type = "Admin";
+            $updated_by_id = $_SESSION['Id_No'];
+            $updated_by_name = $_SESSION['Faculty_Name'];
+            $updated_by_table = "futuregen_db.employee_master_data";
+            $updated_user_type = "Faculty";
 
-            $update_query = "UPDATE central.applications SET First_Name = '$first_name', Sur_Name = '$sur_name', Father_Name = '$father_name', Mother_Name = '$mother_name', Class_Applied = '$class_applied', Prev_Class = " . dbValue($prev_class) . ", Gender = '$gender', DOB = '$dob', Mobile = '$mobile', Aadhar = " . dbValue($aadhar) . ", Mother_Aadhar = " . dbValue($mother_aadhar) . ", Father_Aadhar = " . dbValue($father_aadhar) . ", Religion = '$religion', Caste = '$caste', Category = '$category', House_No = " . dbValue($house_no) . ", Area = '$area', Village = '$village', Student_Type = '$student_type', Previous_School = " . dbValue($previous_school) . ", Van_Route = " . dbValue($van_route) . ", Owner_Id = " . dbValue($owner_id) . ", Owner_Table = " . dbValue($owner_table) . ", Referred_By = '$referred_by_name', Advance_Amount = " . dbValue($advance_amount) . ", DOP = " . dbValue($dop) . ", Payment_Type = " . dbValue($payment_type) . ", Transaction_Id = " . dbValue($transaction_id) . ", Status = '$status', Status_Reason = " . dbValue($reason) . ", Updated_By_Id = '$updated_by_id', Updated_By_Name = '$updated_by_name', Updated_By_Table = '$updated_by_table', Updated_User_Type = '$updated_user_type', Updated_At = NOW(), Updated_Source = 'Website' WHERE App_No = '$appNo'";
+            $owner_id = $_SESSION['Id_No'];
+            $owner_table = 'futuregen_db.employee_master_data';
+            $referred_by_name = $_SESSION['Faculty_Name'];
+
+            $update_query = "UPDATE central.applications SET First_Name = '$first_name', Sur_Name = '$sur_name', Father_Name = '$father_name', Mother_Name = '$mother_name', Class_Applied = '$class_applied', Prev_Class = " . dbValue($prev_class) . ", Gender = '$gender', DOB = '$dob', Mobile = '$mobile', Aadhar = " . dbValue($aadhar) . ", Mother_Aadhar = " . dbValue($mother_aadhar) . ", Father_Aadhar = " . dbValue($father_aadhar) . ", Religion = '$religion', Caste = '$caste', Category = '$category', House_No = " . dbValue($house_no) . ", Area = '$area', Village = '$village', Student_Type = '$student_type', Previous_School = " . dbValue($previous_school) . ", Van_Route = " . dbValue($van_route) . ", Owner_Id = " . dbValue($owner_id) . ", Owner_Table = " . dbValue($owner_table) . ", Referred_By = '$referred_by_name', Advance_Amount = " . dbValue($advance_amount) . ", DOP = " . dbValue($dop) . ", Payment_Type = " . dbValue($payment_type) . ", Transaction_Id = " . dbValue($transaction_id) . ", Updated_By_Id = '$updated_by_id', Updated_By_Name = '$updated_by_name', Updated_By_Table = '$updated_by_table', Updated_User_Type = '$updated_user_type', Updated_At = NOW(), Updated_Source = 'Website' WHERE App_No = '$appNo'";
 
             if (mysqli_query($link, $update_query)) {
+                $nodeResponse = [];
                 try {
                     $details = [
                         "First_Name" => $first_name,
@@ -3000,7 +2364,13 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                         "DOP" => $dop,
                         "Payment_Type" => $payment_type,
                         "Transaction_Id" => $transaction_id,
+                        "App_No" => $appNo,
                     ];
+
+                    $details['Updated_By_Id'] = $_SESSION['Id_No'];
+                    $details['Updated_By_Name'] = $_SESSION['Faculty_Name'];
+                    $details['Updated_By_Table'] = 'futuregen_db.employee_master_data';
+                    $details['Updated_User_Type'] = 'Faculty';
 
                     $nodeUrl = "http://192.168.1.115:3000/generateapplicationpdf";
 
@@ -3041,10 +2411,15 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                     error_log("PDF Generation Failed: " . $e->getMessage());
                 }
 
-                echo "<script>
-                    alert('Application Updated Successfully');
-                    window.location = window.location.href;
-                </script>";
+                $appNo = $nodeResponse['App_No'] ?? $details['App_No'];
+                $branch = $details['Branch'];
+                $mode = 'Edit';
+            ?>
+                <script>
+                    handleSuccess('<?php echo $appNo; ?>', '<?php echo $branch; ?>', '<?php echo $mode; ?>');
+                    document.getElementById("app_form").reset();
+                </script>
+    <?php
             } else {
                 echo "<script>alert('Application Update Failed!');</script>";
             }
