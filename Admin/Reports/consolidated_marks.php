@@ -100,7 +100,7 @@ error_reporting(0);
                         <option value="LKG">LKG</option>
                         <option value="UKG">UKG</option>
                         <?php
-                        for ($i = 1; $i <= 10; $i++) {
+                        for ($i = 1; $i <= 8; $i++) {
                             echo "<option value='" . $i . " CLASS'>" . $i . " CLASS</option>";
                         }
                         ?>

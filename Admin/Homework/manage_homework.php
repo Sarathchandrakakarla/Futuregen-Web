@@ -36,7 +36,7 @@ if (isset($_POST['Delete_All'])) {
         return rmdir($dir);
     }
     $classes = ["PreKG", "LKG", "UKG"];
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 8; $i++) {
         $classes[] = $i . " CLASS";
     }
     $sections = ["A", "B", "C", "D"];
@@ -75,7 +75,7 @@ if (isset($_POST['Previous'])) {
     }
     $flag = "false";
     $classes = ["PreKG", "LKG", "UKG"];
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 8; $i++) {
         $classes[] = $i . " CLASS";
     }
     $sections = ["A", "B", "C", "D", "E"];
@@ -435,7 +435,7 @@ if (isset($_POST['Action'])) {
                         <option value="LKG">LKG</option>
                         <option value="UKG">UKG</option>
                         <?php
-                        for ($i = 1; $i <= 10; $i++) {
+                        for ($i = 1; $i <= 8; $i++) {
                             echo "<option value='" . $i . " CLASS'>" . $i . " CLASS</option>";
                         }
                         ?>

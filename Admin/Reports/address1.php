@@ -2,7 +2,7 @@
 include_once('../../link.php');
 include_once('../includes/rbac_helper.php');
 
-define('MENU_ID', 114);
+define('MENU_ID', 7);
 
 requireLogin();
 requireMenuAccess(MENU_ID);

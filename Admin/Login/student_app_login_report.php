@@ -110,7 +110,7 @@ error_reporting(0);
                     <option value="LKG">LKG</option>
                     <option value="UKG">UKG</option>
                     <?php
-                    for ($i = 1; $i <= 10; $i++) {
+                    for ($i = 1; $i <= 8; $i++) {
                         echo "<option value='" . $i . " CLASS'>" . $i . " CLASS</option>";
                     }
                     ?>
@@ -309,7 +309,7 @@ error_reporting(0);
                     $report = ["Not Logged In" => 0, "Logged In" => 0];
                     echo "<script>report_container.hidden = '';</script>";
                     $classes = ['PreKG', 'LKG', 'UKG'];
-                    for ($i = 1; $i <= 10; $i++) {
+                    for ($i = 1; $i <= 8; $i++) {
                         $classes[] = $i . " CLASS";
                     }
                     if ($report_type == "Class_Wise") {

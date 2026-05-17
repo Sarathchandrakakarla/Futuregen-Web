@@ -182,7 +182,7 @@ error_reporting(0);
                             echo "<script>document.getElementById('fee_label').innerHTML = '" . $type . "'</script>";
                             if ($type != "Vehicle Fee") {
                                 $classes = ["PreKG", "LKG", "UKG"];
-                                for ($i = 1; $i <= 10; $i++) {
+                                for ($i = 1; $i <= 8; $i++) {
                                     array_push($classes, $i . " CLASS");
                                 }
                                 $i = 1;

@@ -110,7 +110,7 @@ error_reporting(0);
                 <th>PreKG</th>
                 <th>LKG</th>
                 <th>UKG</th>
-                <?php for ($i = 1; $i <= 10; $i++) {
+                <?php for ($i = 1; $i <= 8; $i++) {
                     echo '<th>' . $i . ' CLASS</th>';
                 } ?>
                 <th>Total</th>

@@ -188,7 +188,7 @@ error_reporting(0);
                         document.getElementById('" . strtolower($stu_type) . "').checked = true;
                         </script>";
                         $classes = ['PreKG', 'LKG', 'UKG'];
-                        for ($i = 1; $i <= 10; $i++) {
+                        for ($i = 1; $i <= 8; $i++) {
                             array_push($classes, $i . ' CLASS');
                         }
                         $sections = ['A', 'B', 'C', 'D', 'E'];

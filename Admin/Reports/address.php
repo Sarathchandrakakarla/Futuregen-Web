@@ -81,7 +81,7 @@ error_reporting(0);
     <form action="" method="POST">
         <div class="container">
             <div class="row justify-content-center mt-5">
-                <div class="col-lg-6">
+                <div class="col-lg-7">
                     <h2>Address By</h2>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="add_by" id="class_wise" checked value="Class_Wise">
@@ -103,6 +103,10 @@ error_reporting(0);
                         <input class="form-check-input" type="radio" name="add_by" id="droppers" value="Droppers">
                         <label class="form-check-label" for="droppers">Droppers</label>
                     </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="add_by" id="hostellers" value="Hostellers">
+                        <label class="form-check-label" for="hostellers">Hostellers</label>
+                    </div>
                 </div>
             </div>
             <div class="row justify-content-center mt-4" id="class_row">
@@ -113,7 +117,7 @@ error_reporting(0);
                         <option value="LKG">LKG</option>
                         <option value="UKG">UKG</option>
                         <?php
-                        for ($i = 1; $i <= 10; $i++) {
+                        for ($i = 1; $i <= 8; $i++) {
                             echo "<option value='" . $i . " CLASS'>" . $i . " CLASS</option>";
                         }
                         ?>
@@ -395,6 +399,26 @@ error_reporting(0);
                                 $flag = false;
                                 echo "<script>alert('Please Enter Drop Year!')</script>";
                             }
+                        } else if ($search == "Hostellers") {
+                            echo "<script>document.getElementById('hostellers').checked = true;</script>";
+                            if ($_POST['Class'] && $_POST['Section']) {
+                                $class = $_POST['Class'];
+                                $section = $_POST['Section'];
+                                echo "<script>document.getElementById('class').value = '" . $class . "'</script>";
+                                echo "<script>document.getElementById('section').value = '" . $section . "'</script>";
+                                $sql = "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class' AND Stu_Section = '$section' AND Student_Type = 'Hosteller'";
+                                $flag = true;
+                            } else if ($_POST['Class'] && !$_POST['Section']) {
+                                $class = $_POST['Class'];
+                                echo "<script>document.getElementById('class').value = '" . $class . "'</script>";
+                                $sql = "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class' AND Student_Type = 'Hosteller'";
+                                $flag = true;
+                            } else if (!$_POST['Class'] && $_POST['Section']) {
+                                echo "<script>alert('Please Select Class');</script>";
+                            } else {
+                                $sql = "SELECT * FROM `student_master_data` WHERE Student_Type = 'Hosteller' AND Stu_Class IN ('PreKG','LKG','UKG','1 CLASS','2 CLASS','3 CLASS','4 CLASS','5 CLASS','6 CLASS','7 CLASS','8 CLASS')";
+                                $flag = true;
+                            }
                         }
                         if ($flag) {
                             $cols = array();
@@ -576,6 +600,8 @@ error_reporting(0);
                 filename = '<?php echo $from_id . " To " . $to_id; ?>';
             } else if (type == "Droppers") {
                 filename = "Droppers";
+            } else if (type == "Hostellers") {
+                filename = "Hostellers";
             }
             var downloadLink;
             var dataType = 'application/vnd.ms-excel';
@@ -714,6 +740,24 @@ error_reporting(0);
                         result.hidden = '';
                     }
                     txtinp.placeholder = "Ex:(24/25)"
+                    break;
+                case 'hostellers':
+                    message = '';
+                    if (cls_row.hidden) {
+                        cls_row.hidden = '';
+                    }
+                    if (!inp_row.hidden) {
+                        inp_row.hidden = 'hidden';
+                    }
+                    if (!route_row.hidden) {
+                        route_row.hidden = 'hidden';
+                    }
+                    if (!id_row.hidden) {
+                        id_row.hidden = 'hidden';
+                    }
+                    if (!result.hidden) {
+                        result.hidden = 'hidden';
+                    }
                     break;
                 default:
                     if (result.innerHTML == "Area: ") {

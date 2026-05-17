@@ -211,16 +211,6 @@ if (isset($_POST['Ok'])) {
                                                 } else {
                                                     echo "";
                                                 } ?>>8 CLASS</option>
-                        <option value="9 CLASS" <?php if (isset($class) && $class == "9 CLASS") {
-                                                    echo "selected";
-                                                } else {
-                                                    echo "";
-                                                } ?>>9 CLASS</option>
-                        <option value="10 CLASS" <?php if (isset($class) && $class == "10 CLASS") {
-                                                        echo "selected";
-                                                    } else {
-                                                        echo "";
-                                                    } ?>>10 CLASS</option>
                     </select>
                 </div>
                 <div class="p-2 col-lg-4 rounded">

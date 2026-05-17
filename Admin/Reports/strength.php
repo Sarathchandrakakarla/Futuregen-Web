@@ -103,7 +103,7 @@ error_reporting(0);
     </div>
     <?php
     $sql = array();
-    $class = array("PreKG", "LKG", "UKG", "1 CLASS", "2 CLASS", "3 CLASS", "4 CLASS", "5 CLASS", "6 CLASS", "7 CLASS", "8 CLASS", "9 CLASS", "10 CLASS",);
+    $class = array("PreKG", "LKG", "UKG", "1 CLASS", "2 CLASS", "3 CLASS", "4 CLASS", "5 CLASS", "6 CLASS", "7 CLASS", "8 CLASS", "9 CLASS", "10 CLASS");
     $caste = array("OC", "BC", "SC", "ST", "Mi");
     $gen = array("Boy", "Girl");
     foreach ($class as $cls) {
@@ -254,24 +254,6 @@ error_reporting(0);
                     echo "<td style='text-align:center;'>$strength[$c]</td>";
                 }
                 echo "<td style='text-align:center;'>$total[10]</td>";
-                ?>
-            </tr>
-            <tr style="height: 50px;">
-                <td>9 CLASS</td>
-                <?php
-                for ($c; $c < 120; $c++) {
-                    echo "<td style='text-align:center;'>$strength[$c]</td>";
-                }
-                echo "<td>$total[11]</td>";
-                ?>
-            </tr>
-            <tr style="height: 50px;">
-                <td>10 CLASS</td>
-                <?php
-                for ($c; $c < 130; $c++) {
-                    echo "<td style='text-align:center;'>$strength[$c]</td>";
-                }
-                echo "<td>$total[12]</td>";
                 ?>
             </tr>
             <tr>

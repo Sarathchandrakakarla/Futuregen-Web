@@ -183,7 +183,7 @@ error_reporting(0);
                         $fees = [];
                         if ($type != "Vehicle Fee") {
                             $classes = ['PreKG', 'LKG', 'UKG'];
-                            for ($i = 1; $i <= 10; $i++) {
+                            for ($i = 1; $i <= 8; $i++) {
                                 $classes[] = $i . " CLASS";
                             }
                             foreach ($classes as $class) {
