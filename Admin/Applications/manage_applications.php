@@ -503,6 +503,11 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         background: #ffffff;
     }
 
+    #table-container{
+        max-height: 500px;
+        overflow: scroll;
+    }
+
     @media screen and (max-width:900px) {
         .section {
             margin-left: 8%;

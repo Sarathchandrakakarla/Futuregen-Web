@@ -250,7 +250,6 @@ if (isset($_POST["update"])) {
             <?php } ?>>
             <input type="submit" name="update" value="Update" <?php echo !can('update', MENU_ID) ? 'disabled' : ''; ?> />
           </div>
-          <input type="submit" name="update" value="Update" />
           <input type="reset" value="Reset" />
         </div>
       </form>
