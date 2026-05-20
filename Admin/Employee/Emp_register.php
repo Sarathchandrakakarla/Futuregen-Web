@@ -235,24 +235,49 @@ error_reporting(0);
     if (mysqli_num_rows(mysqli_query($link, "SELECT * FROM `employee_master_data` WHERE Emp_Id = '$id'")) != 0) {
       echo "<script>alert('Employee Already Exists!');</script>";
     } else {
-      $sql = mysqli_query($link, "INSERT INTO `employee_master_data` VALUES('', '$id'
+      mysqli_begin_transaction($link);
+      try {
+        $sql = mysqli_query($link, "INSERT INTO `employee_master_data` VALUES('', '$id'
         , '$firstname', '$surname', '$fathername', '$qualification',
         '$dob', '$relation', '$mobile', '$aadhar', '$houseno', '$area','$village','$doj','$designation','$salary','$pf','$dopf','$status','$ac','$bank')");
-      if ($sql) {
+
+        if (!$sql) {
+          throw new Exception('Employee Data Insertion Failed!');
+        }
+
+        /* ---------- Insert Login ---------- */
+        $chk = mysqli_query(
+          $link,
+          "SELECT 1 FROM faculty WHERE Id_No = '$id' LIMIT 1"
+        );
+
+        if (mysqli_num_rows($chk)) {
+          throw new Exception('Login already exists for this faculty');
+        }
+
+        $password = "FGEM" . rand(1111, 9999);
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        $login_sql = mysqli_query(
+          $link,
+          "INSERT INTO faculty(Id_No, Faculty_Name, Password, Fac_Hash) VALUES ('$id', '$firstname', '$password', '$hash')"
+        );
+        
+        if (!$login_sql) {
+          throw new Exception('Login insert failed');
+        }
+
+        mysqli_commit($link);
         echo
         "
-		<script>
-		alert('Employee Data Inserted Successfully!');
-        location.replace('');
-		</script>
-		";
-      } else {
-        echo
-        "
-		<script>
-		alert('Employee Data Insertion Failed!');
-		</script>
-		";
+          <script>
+          alert('Employee Data Inserted Successfully!');
+              location.replace('');
+          </script>
+        ";
+      } catch (Exception $e) {
+        mysqli_rollback($link);
+        echo "<script>alert('" . $e->getMessage() . "');</script>";
       }
     }
   }
