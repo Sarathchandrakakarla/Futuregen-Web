@@ -1706,14 +1706,14 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             const status = row.Status || '';
             const branch = row.Branch || '';
             const appNo = String(row.App_No || '').replace(/"/g, '&quot;');
-            const isEligible = status === 'Active' && branch === 'VHS';
+            const isEligible = status === 'Active' && branch === 'FGS';
             let tooltip = '';
 
             if (status === 'Joined') {
                 tooltip = 'Already converted to student';
             } else if (status !== 'Active') {
                 tooltip = 'Only Active applications can be converted';
-            } else if (branch !== 'VHS') {
+            } else if (branch !== 'FGS') {
                 tooltip = 'This application belongs to another branch';
             }
 
