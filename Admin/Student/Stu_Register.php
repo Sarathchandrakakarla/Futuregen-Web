@@ -765,7 +765,7 @@ error_reporting(0);
                 document.getElementById('selected_staff_value').value = " . json_encode($app_data['Owner_Id'] . ' - ' . $app_data['Referred_By']) . ";
                 document.getElementById('selected_staff').innerText = " . json_encode($app_data['Owner_Id'] . ' - ' . $app_data['Referred_By']) . ";
                 document.getElementById('selected_staff').style.display = 'block';
-                document.getElementById('branch').value = " . json_encode($app_data['Branch']) . ";
+                document.getElementById('branch').value = " . json_encode(str_contains(($app_data['Owner_Table'] ?? ''), 'victory_db') ? 'VHS' : 'FGS')  . ";
                 document.getElementById('user_type').value = " . json_encode(str_contains(($app_data['Owner_Table'] ?? ''), '.admin') ? 'Admin' : 'Faculty') . ";
                 fetchReferralUsers(" . json_encode($app_data['Owner_Id']) . ");
                 setTimeout(() => {
@@ -1054,6 +1054,32 @@ error_reporting(0);
 
                                             if (!$sfInsert) {
                                                 throw new Exception('School fee insert failed');
+                                            }
+
+                                            /* ---------- Admission Fee ---------- */
+                                            $afQ = mysqli_query(
+                                                $link,
+                                                "SELECT Fee FROM actual_fee
+                                            WHERE Type='Admission Fee' AND Class='$class'
+                                            LIMIT 1"
+                                            );
+
+                                            if (!$afQ || mysqli_num_rows($afQ) == 0) {
+                                                throw new Exception('Admission fee not configured');
+                                            }
+
+                                            $admission_fee = mysqli_fetch_assoc($afQ)['Fee'];
+
+                                            $afInsert = mysqli_query(
+                                                $link,
+                                                "INSERT INTO stu_fee_master_data VALUES (
+                                                '', '$id', '$firstname', '$class', '$section',
+                                                '$area', 'Admission Fee',
+                                                '$admission_fee', '0', '$admission_fee', '$admission_fee', NULL)"
+                                            );
+
+                                            if (!$afInsert) {
+                                                throw new Exception('Admission fee insert failed');
                                             }
 
                                             /* ---------- Vehicle Fee ---------- */
