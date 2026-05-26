@@ -244,6 +244,16 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         $query .= " AND app.Previous_School LIKE '%$ps%'";
     }
 
+    if (!empty($filters['paymentStatus'])) {
+        $paymentStatus = mysqli_real_escape_string($conn, $filters['paymentStatus']);
+
+        if ($paymentStatus == 'Paid') {
+            $query .= " AND app.Advance_Amount IS NOT NULL AND app.Advance_Amount > 0";
+        } else if ($paymentStatus == 'NotPaid') {
+            $query .= " AND (app.Advance_Amount IS NULL OR app.Advance_Amount = '' OR app.Advance_Amount = 0)";
+        }
+    }
+
     if (!empty($filters['referredByType']) && $filters['referredByType'] == 'Staff') {
         if (!empty($filters['referredOwnerId']) && !empty($filters['referredOwnerTable'])) {
             $ownerId = mysqli_real_escape_string($conn, $filters['referredOwnerId']);
@@ -503,7 +513,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         background: #ffffff;
     }
 
-    #table-container{
+    #table-container {
         max-height: 500px;
         overflow: scroll;
     }
@@ -874,15 +884,18 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         <div class="container" style="background: transparent;padding: 0;">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h5 class="mb-0">Application Reports</h5>
+                    <h5 style="font-family:Times New Roman;" class="mb-0">Application Reports</h5>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#reportsFilterModal">
+                        <button style="font-family:Times New Roman;" type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#reportsFilterModal">
                             Filters
                         </button>
-                        <button type="button" class="btn btn-outline-light btn-sm" onclick="return false;" id="export">
+                        <button style="font-family:Times New Roman;" type="button" class="btn btn-outline-light btn-sm" onclick="renderColumnSelector()" data-bs-toggle="modal" data-bs-target="#columnSelectorModal">
+                            Columns
+                        </button>
+                        <button style="font-family:Times New Roman;" type="button" class="btn btn-outline-light btn-sm" onclick="return false;" id="export">
                             Export
                         </button>
-                        <button type="button" class="btn btn-outline-light btn-sm" onclick="getReports()">
+                        <button style="font-family:Times New Roman;" type="button" class="btn btn-outline-light btn-sm" onclick="getReports()">
                             Refresh
                         </button>
                     </div>
@@ -895,35 +908,20 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td style="font-size:30px;" colspan="4"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></td>
+                                <td style="font-size:30px;font-family:Times New Roman;" colspan="4"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></td>
                             </tr>
                             <tr></tr>
                         </table>
                         <table class="table table-bordered table-striped mb-0" border="1">
                             <thead class="table-light">
-                                <tr>
+                                <tr id="reports_header">
                                     <th>S.No</th>
-                                    <th>App_No</th>
-                                    <th>First_Name</th>
-                                    <th>Sur_Name</th>
-                                    <th>Father_Name</th>
-                                    <th>Mobile</th>
-                                    <th>Class_Applied</th>
-                                    <th>Gender</th>
-                                    <th>Village</th>
-                                    <th>Student_Type</th>
-                                    <th>Van_Route</th>
-                                    <th>Previous_School</th>
-                                    <th>Branch_Name</th>
-                                    <th>Referred_By</th>
-                                    <th>Status</th>
-                                    <th>Created_At</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="reports_tbody">
                                 <tr>
-                                    <td colspan="17" class="text-center">No Reports Found</td>
+                                    <td colspan="2" class="text-center">No Reports Found</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1018,6 +1016,17 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                             <input type="text" id="filter_previous_school" class="form-control" placeholder="Enter Previous School">
                         </div>
                         <div class="col-md-4">
+                            <label class="form-label d-block">Payment Status</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="filter_payment_status" id="filter_payment_paid" value="Paid">
+                                <label class="form-check-label" for="filter_payment_paid">Paid</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="filter_payment_status" id="filter_payment_not_paid" value="NotPaid">
+                                <label class="form-check-label" for="filter_payment_not_paid">Not Paid</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label d-block">Referred By Type</label>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="filter_referred_by_type" id="filter_referred_staff" value="Staff" checked>
@@ -1052,6 +1061,24 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" onclick="resetReportFilters()">Reset</button>
                     <button type="button" class="btn btn-primary" onclick="applyReportFilters()">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="columnSelectorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Report Columns</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2" id="column_selector_body"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="resetColumns()">Reset</button>
+                    <button type="button" class="btn btn-primary" onclick="applyColumnSelection()" data-bs-dismiss="modal">Apply</button>
                 </div>
             </div>
         </div>
@@ -1685,7 +1712,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
         function renderEditButton(row, enabledOnclick) {
             if (canEditApplication(row)) {
                 const safeOnclick = enabledOnclick.replace(/'/g, '&#39;');
-                return `<button class="btn btn-sm btn-outline-primary" onclick='${safeOnclick}'>Edit</button>`;
+                return `<button class="btn btn-sm btn-outline-primary" style="font-family:Times New Roman;" onclick='${safeOnclick}'>Edit</button>`;
             }
 
             return `
@@ -1722,7 +1749,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             return `
                 <form method="POST" action="/Futuregen/Admin/Student/Stu_Register.php" style="display:inline;">
                     <input type="hidden" name="app_id" value="${appNo}">
-                    <button type="submit" class="btn btn-sm btn-outline-primary" ${disabledAttrs}>
+                    <button type="submit" class="btn btn-sm btn-outline-primary" style="font-family:Times New Roman;" ${disabledAttrs}>
                         Join as Student
                     </button>
                 </form>
@@ -1777,6 +1804,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 area: document.getElementById('filter_area').value.trim(),
                 village: document.getElementById('filter_village').value.trim(),
                 previousSchool: document.getElementById('filter_previous_school').value.trim(),
+                paymentStatus: document.querySelector('input[name="filter_payment_status"]:checked')?.value || '',
                 referredByType: document.querySelector('input[name="filter_referred_by_type"]:checked')?.value || '',
                 referredOwnerId: document.getElementById('filter_referred_owner_id').value,
                 referredOwnerTable: document.getElementById('filter_referred_owner_table').value,
@@ -1817,40 +1845,281 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                 });
         }
 
+        const reportColumns = [{
+                key: 'App_No',
+                label: 'App No',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'First_Name',
+                label: 'First Name',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Sur_Name',
+                label: 'Sur Name',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Father_Name',
+                label: 'Father Name',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Mother_Name',
+                label: 'Mother Name',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Class_Applied',
+                label: 'Class Applied',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Gender',
+                label: 'Gender',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'DOB',
+                label: 'DOB',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Mobile',
+                label: 'Mobile',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Aadhar',
+                label: 'Aadhar',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Mother_Aadhar',
+                label: 'Mother Aadhar',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Father_Aadhar',
+                label: 'Father Aadhar',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Religion',
+                label: 'Religion',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Caste',
+                label: 'Caste',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Category',
+                label: 'Category',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'House_No',
+                label: 'House No',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Area',
+                label: 'Area',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Village',
+                label: 'Village',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Student_Type',
+                label: 'Student Type',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Van_Route',
+                label: 'Van Route',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Previous_School',
+                label: 'Previous School',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Branch_Name',
+                label: 'Branch Name',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Referred_By',
+                label: 'Referred_By',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Payment_Status',
+                label: 'Payment Status',
+                visible: true,
+                defaultVisible: true,
+                formatter: row =>
+                    row.Advance_Amount !== null &&
+                    row.Advance_Amount !== '' &&
+                    parseFloat(row.Advance_Amount) > 0 ?
+                    'Paid' : 'Not Paid'
+            },
+            {
+                key: 'Advance_Amount',
+                label: 'Advance Amount',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'DOP',
+                label: 'Date of Payment',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Payment_Type',
+                label: 'Mode of Payment',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Transaction_Id',
+                label: 'Transaction Id',
+                visible: false,
+                defaultVisible: false
+            },
+            {
+                key: 'Status',
+                label: 'Status',
+                visible: true,
+                defaultVisible: true
+            },
+            {
+                key: 'Created_At',
+                label: 'Created At',
+                visible: true,
+                defaultVisible: true,
+                nowrap: true,
+                formatter: row => formatDate(row.Created_At)
+            }
+        ];
+
+        function getVisibleReportColumns() {
+            return reportColumns.filter(col => col.visible);
+        }
+
+        function renderReportHeader() {
+            let header = document.getElementById('reports_header');
+            let html = '<th style="font-family:Times New Roman;">S.No</th>';
+
+            getVisibleReportColumns().forEach(col => {
+                html += `<th data-column="${col.key}" style="white-space:nowrap;font-family:Times New Roman;">${col.label}</th>`;
+            });
+
+            html += '<th style="font-family:Times New Roman;">Actions</th>';
+            header.innerHTML = html;
+        }
+
+        function renderColumnSelector() {
+            let body = document.getElementById('column_selector_body');
+            let html = '';
+
+            reportColumns.forEach(col => {
+                let checkboxId = 'col_' + col.key.toLowerCase();
+                html += `
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input report-column" type="checkbox" value="${col.key}" id="${checkboxId}" ${col.visible ? 'checked' : ''}>
+                            <label class="form-check-label" for="${checkboxId}">${col.label}</label>
+                        </div>
+                    </div>
+                `;
+            });
+
+            body.innerHTML = html;
+        }
+
+        function applyColumnSelection() {
+            document.querySelectorAll('.report-column').forEach(checkbox => {
+                let col = reportColumns.find(item => item.key === checkbox.value);
+
+                if (col) {
+                    col.visible = checkbox.checked;
+                }
+            });
+
+            renderReports(reportRows);
+        }
+
+        function resetColumns() {
+            reportColumns.forEach(col => {
+                col.visible = col.defaultVisible;
+            });
+
+            renderColumnSelector();
+            renderReports(reportRows);
+        }
+
         function renderReports(data) {
+
+            renderReportHeader();
 
             let tbody = document.getElementById('reports_tbody');
             tbody.innerHTML = '';
             reportRows = data;
 
             if (!data.length) {
-                tbody.innerHTML = '<tr><td colspan="17" class="text-center">No Reports Found</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="${getVisibleReportColumns().length + 2}" class="text-center" style="font-family:Times New Roman;">No Reports Found</td></tr>`;
                 return;
             }
 
             data.forEach((row, index) => {
+                let cells = '';
+
+                getVisibleReportColumns().forEach(col => {
+                    let value = col.formatter ? col.formatter(row) : (row[col.key] || '');
+                    let nowrap = col.nowrap ? 'white-space:nowrap;' : '';
+                    cells += `<td data-column="${col.key}" style="font-family:Times New Roman;${nowrap}">${value || ''}</td>`;
+                });
+
                 let tr = `
                     <tr>
-                        <td>${index + 1}</td>
-                        <td>${row.App_No || ''}</td>
-                        <td>${row.First_Name || ''}</td>
-                        <td>${row.Sur_Name || ''}</td>
-                        <td>${row.Father_Name || ''}</td>
-                        <td>${row.Mobile || ''}</td>
-                        <td>${row.Class_Applied || ''}</td>
-                        <td>${row.Gender || ''}</td>
-                        <td>${row.Village || ''}</td>
-                        <td>${row.Student_Type || ''}</td>
-                        <td>${row.Van_Route || ''}</td>
-                        <td>${row.Previous_School || ''}</td>
-                        <td>${row.Branch_Name || ''}</td>
-                        <td>${row.Referred_By || ''}</td>
-                        <td>${row.Status || ''}</td>
-                        <td style="white-space:nowrap;">${formatDate(row.Created_At)}</td>
+                        <td style="font-family:Times New Roman;">${index + 1}</td>
+                        ${cells}
                         <td>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-success" onclick="openPDF('${row.Branch}', '${row.App_No}')">PDF</button>
-                                <button class="btn btn-sm btn-outline-dark" onclick="viewReportApplication(${index})">View</button>
+                                <button style="font-family:Times New Roman;" class="btn btn-sm btn-outline-success" onclick="openPDF('${row.Branch}', '${row.App_No}')">PDF</button>
+                                <button style="font-family:Times New Roman;" class="btn btn-sm btn-outline-dark" onclick="viewReportApplication(${index})">View</button>
                                 ${renderEditButton(row, `editReportApplication(${index})`)}
                                 ${renderJoinAsStudentButton(row)}
                             </div>
@@ -1862,8 +2131,11 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             });
         }
 
+        renderReports(reportRows);
+        renderColumnSelector();
+
         function openPDF(branch, appNo) {
-            let url = `/Victory/Files/Applications/${branch}/Application_${appNo}.pdf`;
+            let url = `https://victoryschools.in/Victory/Files/Applications/${branch}/Application_${appNo}.pdf`;
             window.open(url, '_blank');
         }
 
@@ -2294,7 +2566,17 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
             var downloadLink;
             var dataType = 'application/vnd.ms-excel';
             var tableSelect = document.getElementById('table-container');
-            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+            var exportTable = tableSelect.cloneNode(true);
+
+            exportTable.querySelectorAll('[data-column]').forEach(cell => {
+                let col = reportColumns.find(item => item.key === cell.getAttribute('data-column'));
+
+                if (col && !col.visible) {
+                    cell.remove();
+                }
+            });
+
+            var tableHTML = exportTable.outerHTML.replace(/ /g, '%20');
             // Specify file name
             filename = filename ? filename + '.xls' : 'excel_data.xls';
 
@@ -2651,7 +2933,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                         "Transaction_Id" => $transaction_id,
                     ];
 
-                    $nodeUrl = "http://192.168.1.115:3000/generateapplicationpdf";
+                    $nodeUrl = "http://18.61.98.208:3001/generateapplicationpdf";
 
                     $payload = json_encode([
                         "details" => $details,
@@ -3007,7 +3289,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                         "Transaction_Id" => $transaction_id,
                     ];
 
-                    $nodeUrl = "http://192.168.1.115:3000/generateapplicationpdf";
+                    $nodeUrl = "http://18.61.98.208:3001/generateapplicationpdf";
 
                     $payload = json_encode([
                         "details" => $details,
