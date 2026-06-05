@@ -1142,10 +1142,58 @@ error_reporting(0);
 
                                             mysqli_commit($link);
 
-                                            echo "<script>
-                                                alert('Student created successfully!');
-                                                location.replace('');
-                                            </script>";
+                                            $advance_query = !empty($_POST['app_id']) ? mysqli_query($link, "
+                                            SELECT Advance_Amount, DOP, Payment_Type, Transaction_Id
+                                            FROM central.applications
+                                            WHERE App_No = '$app_id'
+                                            LIMIT 1
+                                        ") : false;
+
+                                            $advance_data = $advance_query ? mysqli_fetch_assoc($advance_query) : null;
+                                            $advance_amount = $advance_data['Advance_Amount'] ?? 0;
+
+                                            if ($advance_data && $advance_amount > 0) {
+                                                $transaction_row = ($advance_data['Payment_Type'] == 'UPI')
+                                                    ? "<p><strong>Transaction Id :</strong> " . htmlspecialchars($advance_data['Transaction_Id']) . "</p>"
+                                                    : "";
+
+                                                echo "
+                                                <div id='advance_payment_modal' class='referral-modal' style='display:flex;'>
+                                                    <div class='referral-modal-content'>
+                                                        <h3>Advance Payment Found</h3>
+                                                        <p>This student paid advance amount during application creation.</p>
+                                                        <p><strong>Advance Amount :</strong> &#8377;" . htmlspecialchars($advance_data['Advance_Amount']) . "</p>
+                                                        <p><strong>Date Of Payment :</strong> " . htmlspecialchars($advance_data['DOP']) . "</p>
+                                                        <p><strong>Payment Type :</strong> " . htmlspecialchars($advance_data['Payment_Type']) . "</p>
+                                                        $transaction_row
+                                                        <p>Do you want to enter the fee payment now?</p>
+
+                                                        <form action='../Fee/stu_fee_pay.php' method='POST' id='advance_fee_form'>
+                                                            <input type='hidden' name='Id_No' value='" . htmlspecialchars($id, ENT_QUOTES) . "'>
+                                                            <input type='hidden' name='Advance_Amount' value='" . htmlspecialchars($advance_data['Advance_Amount'], ENT_QUOTES) . "'>
+                                                            <input type='hidden' name='DOP' value='" . htmlspecialchars($advance_data['DOP'], ENT_QUOTES) . "'>
+                                                            <input type='hidden' name='Payment_Type' value='" . htmlspecialchars($advance_data['Payment_Type'], ENT_QUOTES) . "'>
+                                                            <input type='hidden' name='Transaction_Id' value='" . htmlspecialchars($advance_data['Transaction_Id'], ENT_QUOTES) . "'>
+                                                        </form>
+
+                                                        <div class='modal-buttons'>
+                                                            <button type='submit' form='advance_fee_form' class='btn btn-primary'>
+                                                                Enter Now
+                                                            </button>
+                                                            <button type='button' class='btn btn-secondary' onclick=\"document.getElementById('advance_payment_modal').style.display='none'; location.replace('');\">
+                                                                Later
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <script>alert('Student created successfully!');</script>
+                                            ";
+                                            } else {
+                                                echo "<script>
+                                                    alert('Student created successfully!');
+                                                    location.replace('');
+                                                </script>";
+                                            }
                                         } catch (Exception $e) {
 
                                             mysqli_rollback($link);

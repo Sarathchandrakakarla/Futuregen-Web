@@ -85,6 +85,63 @@ if (isset($_POST['Ok'])) {
     }
 }
 
+if (!isset($_POST['Ok']) && !isset($_POST['add']) && isset($_POST['Id_No'], $_POST['Advance_Amount'], $_POST['DOP'], $_POST['Payment_Type'], $_POST['Transaction_Id'])) {
+    $type = "Admission Fee";
+    $id = $_POST['Id_No'];
+    $advance_amount = $_POST['Advance_Amount'];
+    $amount = (int)$advance_amount;
+    $date = $_POST['DOP'];
+    $payment_type = $_POST['Payment_Type'];
+    $transaction_id = $_POST['Transaction_Id'];
+    $advance_payment_entry = true;
+    $_SESSION['DOP'] = format_date($date);
+
+    $query1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Id_No = '$id'");
+    if (mysqli_num_rows($query1) == 0) {
+        echo "<script>alert('No Student Found!')</script>";
+    } else {
+        while ($row = mysqli_fetch_assoc($query1)) {
+            $name = $row['First_Name'];
+            $class = $row['Stu_Class'];
+            $route = $row['Van_Route'];
+            if ($class === '' || $class === NULL) {
+                echo "<script>alert('Student class not assigned');</script>";
+                exit;
+            }
+        }
+
+        $total_fee = 0;
+        $tot_query = mysqli_query($link, "SELECT * FROM `stu_fee_master_data` WHERE Id_No = '$id' AND Type = '$type' LIMIT 1");
+        if (mysqli_num_rows($tot_query) == 0) {
+            $query2 = mysqli_query($link, "SELECT * FROM `fee_balances` WHERE Id_No = '$id' AND Type = '$type' LIMIT 1");
+            if (mysqli_num_rows($query2) == 0) {
+                echo "<script>alert('Student Not Found in Fee Master Data and Fee Balances! Please Add student in Fee Master Data via Student Modify Page')</script>";
+                exit;
+            } else {
+                $fee_source = "fee_balances";
+                while ($row2 = mysqli_fetch_assoc($query2)) {
+                    $total_fee = $row2['Balance'];
+                }
+            }
+        } else {
+            $fee_source = "stu_fee_master_data";
+            while ($tot_row = mysqli_fetch_assoc($tot_query)) {
+                $total_fee = $tot_row['Last_Balance'] + $tot_row['Current_Balance'];
+            }
+        }
+
+        $paid_query = mysqli_query($link, "SELECT * FROM `stu_paid_fee` WHERE Id_No = '$id' AND Type = '$type'");
+        $paid_tot = 0;
+        while ($paid_row = mysqli_fetch_assoc($paid_query)) {
+            $paid_tot += (int)$paid_row['Fee'];
+        }
+        $final = $total_fee - $paid_tot;
+        $_SESSION['Final_Balance'] = max(0, $final);
+        $_SESSION['FEE_SOURCE'] = $fee_source;
+        $_SESSION['FEE_KEY'] = $class;
+    }
+}
+
 function format_date($date)
 {
     $date = explode('-', $date);
@@ -101,188 +158,264 @@ if (isset($_POST['add'])) {
     }
 
     /* ---------- Basic Inputs ---------- */
+    $type         = $_POST['Type'] ?? '';
+    $id           = $_POST['Id_No'] ?? '';
+    $amount       = isset($_POST['Amount']) ? (int)$_POST['Amount'] : 0;
+    $bill         = $_POST['Bill_No'] ?? '';
+    $payment_type = $_POST['Payment_Type'] ?? '';
+    $date_raw     = $_POST['DOP'] ?? '';
+    $transaction_id = $_POST['Transaction_Id'] ?? '';
+    if (isset($_POST['Advance_Amount'])) {
+        $advance_amount = $_POST['Advance_Amount'];
+        $advance_payment_entry = true;
+    }
+    if ($date_raw != '') {
+        $_SESSION['DOP'] = $date_raw;
+    }
+
+    if ($id != '') {
+        $query1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Id_No = '$id'");
+        if ($query1 && mysqli_num_rows($query1) != 0) {
+            while ($row = mysqli_fetch_assoc($query1)) {
+                $name = $row['First_Name'];
+                $class = $row['Stu_Class'];
+                $route = $row['Van_Route'];
+            }
+
+            if ($type != '') {
+                $total_fee = 0;
+                $tot_query = mysqli_query($link, "SELECT * FROM `stu_fee_master_data` WHERE Id_No = '$id' AND Type = '$type' LIMIT 1");
+                if ($tot_query && mysqli_num_rows($tot_query) != 0) {
+                    $fee_source = "stu_fee_master_data";
+                    while ($tot_row = mysqli_fetch_assoc($tot_query)) {
+                        $total_fee = $tot_row['Last_Balance'] + $tot_row['Current_Balance'];
+                    }
+                } else {
+                    $query2 = mysqli_query($link, "SELECT * FROM `fee_balances` WHERE Id_No = '$id' AND Type = '$type' LIMIT 1");
+                    if ($query2 && mysqli_num_rows($query2) != 0) {
+                        $fee_source = "fee_balances";
+                        while ($row2 = mysqli_fetch_assoc($query2)) {
+                            $total_fee = $row2['Balance'];
+                        }
+                    }
+                }
+
+                if (isset($fee_source)) {
+                    $paid_query = mysqli_query($link, "SELECT * FROM `stu_paid_fee` WHERE Id_No = '$id' AND Type = '$type'");
+                    $paid_tot = 0;
+                    while ($paid_row = mysqli_fetch_assoc($paid_query)) {
+                        $paid_tot += (int)$paid_row['Fee'];
+                    }
+                    $final = $total_fee - $paid_tot;
+                    $_SESSION['Final_Balance'] = max(0, $final);
+                    $_SESSION['FEE_SOURCE'] = $fee_source;
+                    if ($type === 'Vehicle Fee') {
+                        $_SESSION['FEE_KEY'] = $route;
+                    } else {
+                        $_SESSION['FEE_KEY'] = $class;
+                    }
+                }
+            }
+        }
+    }
+
+    $validation_failed = false;
+
     if (empty($_POST['Type'])) {
         echo "<script>alert('Please Select Fee Type!')</script>";
-        exit;
+        $validation_failed = true;
     }
 
-    if (empty($_POST['Id_No'])) {
+    if (!$validation_failed && empty($_POST['Id_No'])) {
         echo "<script>alert('Please Enter ID No!')</script>";
-        exit;
+        $validation_failed = true;
     }
 
-    if (empty($_POST['Amount'])) {
+    if (!$validation_failed && empty($_POST['Amount'])) {
         echo "<script>alert('Please Enter Amount!')</script>";
-        exit;
+        $validation_failed = true;
     }
 
-    if (empty($_POST['Bill_No'])) {
+    if (!$validation_failed && empty($_POST['DOP'])) {
+        echo "<script>alert('Please Select Date of Payment!')</script>";
+        $validation_failed = true;
+    }
+
+    if (!$validation_failed && empty($_POST['Payment_Type'])) {
+        echo "<script>alert('Please Select Payment Type!')</script>";
+        $validation_failed = true;
+    }
+
+    if (!$validation_failed && empty($_POST['Bill_No'])) {
         echo "<script>alert('Please Enter Bill No.!')</script>";
-        exit;
+        $validation_failed = true;
     }
-
-    $type         = $_POST['Type'];
-    $id           = $_POST['Id_No'];
-    $amount       = (int)$_POST['Amount'];
-    $bill         = $_POST['Bill_No'];
-    $payment_type = $_POST['Payment_Type'];
-    $date_raw     = $_POST['DOP'];
 
     /* ---------- Session values from OK screen ---------- */
-    if (!isset($_SESSION['Final_Balance'], $_SESSION['FEE_SOURCE'], $_SESSION['FEE_KEY'])) {
+    if (!$validation_failed && !isset($_SESSION['Final_Balance'], $_SESSION['FEE_SOURCE'], $_SESSION['FEE_KEY'])) {
         echo "<script>alert('Session expired. Please fetch student details again.')</script>";
-        exit;
+        $validation_failed = true;
     }
 
-    $final_balance = (int)$_SESSION['Final_Balance'];
-    $fee_source    = $_SESSION['FEE_SOURCE'];   // 'stu_fee_master_data' | 'fee_balances'
-    $fee_key       = $_SESSION['FEE_KEY'];      // class OR route
+    if (!$validation_failed) {
+        $final_balance = (int)$_SESSION['Final_Balance'];
+        $fee_source    = $_SESSION['FEE_SOURCE'];   // 'stu_fee_master_data' | 'fee_balances'
+        $fee_key       = $_SESSION['FEE_KEY'];      // class OR route
+    }
 
     /* ---------- Amount Validation ---------- */
-    if ($amount <= 0) {
+    if (!$validation_failed && $amount <= 0) {
         echo "<script>alert('Invalid payment amount!')</script>";
-        exit;
+        $validation_failed = true;
     }
 
-    if ($amount > $final_balance) {
+    if (!$validation_failed && $amount > $final_balance) {
         echo "<script>alert('Amount exceeds outstanding balance!')</script>";
-        exit;
+        $validation_failed = true;
     }
 
     /* ---------- Fetch student (safe) ---------- */
-    $stuQ = mysqli_query(
-        $link,
-        "SELECT First_Name, Stu_Class, Stu_Section, Mobile, Van_Route
-         FROM student_master_data
-         WHERE Id_No = '$id'
-         LIMIT 1"
-    );
-
-    if (!$stuQ || mysqli_num_rows($stuQ) == 0) {
-        echo "<script>alert('Student not found!')</script>";
-        exit;
+    if (!$validation_failed) {
+        $stuQ = mysqli_query(
+            $link,
+            "SELECT First_Name, Stu_Class, Stu_Section, Mobile, Van_Route
+             FROM student_master_data
+             WHERE Id_No = '$id'
+             LIMIT 1"
+        );
     }
 
-    $stu = mysqli_fetch_assoc($stuQ);
+    if (!$validation_failed && (!$stuQ || mysqli_num_rows($stuQ) == 0)) {
+        echo "<script>alert('Student not found!')</script>";
+        $validation_failed = true;
+    }
 
-    $name    = $stu['First_Name'];
-    $class   = $stu['Stu_Class'];
-    $section = $stu['Stu_Section'];
-    $mobile  = $stu['Mobile'];
-    $route   = $stu['Van_Route'];
+    if (!$validation_failed) {
+        $stu = mysqli_fetch_assoc($stuQ);
+
+        $name    = $stu['First_Name'];
+        $class   = $stu['Stu_Class'];
+        $section = $stu['Stu_Section'];
+        $mobile  = $stu['Mobile'];
+        $route   = $stu['Van_Route'];
+    }
 
     /* ---------- Date Formatting ---------- */
-    $arr = explode('-', $date_raw);   // yyyy-mm-dd
-    $monthMap = [
-        1 => 'Jan',
-        2 => 'Feb',
-        3 => 'Mar',
-        4 => 'Apr',
-        5 => 'May',
-        6 => 'Jun',
-        7 => 'Jul',
-        8 => 'Aug',
-        9 => 'Sep',
-        10 => 'Oct',
-        11 => 'Nov',
-        12 => 'Dec'
-    ];
-    $date = $arr[2] . "-" . $monthMap[(int)$arr[1]] . "-" . $arr[0];
+    if (!$validation_failed) {
+        $arr = explode('-', $date_raw);   // yyyy-mm-dd
+        $monthMap = [
+            1 => 'Jan',
+            2 => 'Feb',
+            3 => 'Mar',
+            4 => 'Apr',
+            5 => 'May',
+            6 => 'Jun',
+            7 => 'Jul',
+            8 => 'Aug',
+            9 => 'Sep',
+            10 => 'Oct',
+            11 => 'Nov',
+            12 => 'Dec'
+        ];
+        $date = $arr[2] . "-" . $monthMap[(int)$arr[1]] . "-" . $arr[0];
+    }
 
     /* =========================================================
        TRANSACTION START
     ========================================================= */
 
-    mysqli_begin_transaction($link);
+    if (!$validation_failed) {
+        mysqli_begin_transaction($link);
 
-    try {
+        try {
 
-        /* ---------- Insert Payment Ledger ---------- */
-        if ($type === 'Vehicle Fee') {
+            /* ---------- Insert Payment Ledger ---------- */
+            if ($type === 'Vehicle Fee') {
 
-            $ins = mysqli_query(
-                $link,
-                "INSERT INTO stu_paid_fee VALUES (
-                    '',
-                    '$id',
-                    '$name',
-                    '$type',
-                    '$class',
-                    '$section',
-                    '$amount',
-                    '$date',
-                    '$payment_type',
-                    '$bill',
-                    '$route'
-                )"
-            );
-        } else {
+                $ins = mysqli_query(
+                    $link,
+                    "INSERT INTO stu_paid_fee VALUES (
+                        '',
+                        '$id',
+                        '$name',
+                        '$type',
+                        '$class',
+                        '$section',
+                        '$amount',
+                        '$date',
+                        '$payment_type',
+                        '$bill',
+                        '$route'
+                    )"
+                );
+            } else {
 
-            $ins = mysqli_query(
-                $link,
-                "INSERT INTO stu_paid_fee VALUES (
-                    '',
-                    '$id',
-                    '$name',
-                    '$type',
-                    '$class',
-                    '$section',
-                    '$amount',
-                    '$date',
-                    '$payment_type',
-                    '$bill',
-                    NULL
-                )"
-            );
-        }
-
-        if (!$ins) {
-            throw new Exception('Payment insert failed');
-        }
-
-        /* ---------- Update fee_balances ONLY if fallback ---------- */
-        if ($fee_source === 'fee_balances') {
-
-            $upd = mysqli_query(
-                $link,
-                "UPDATE fee_balances
-                 SET Balance = Balance - $amount
-                 WHERE Id_No = '$id' AND Type = '$type'
-                 LIMIT 1"
-            );
-
-            if (!$upd) {
-                throw new Exception('Fee balance update failed');
+                $ins = mysqli_query(
+                    $link,
+                    "INSERT INTO stu_paid_fee VALUES (
+                        '',
+                        '$id',
+                        '$name',
+                        '$type',
+                        '$class',
+                        '$section',
+                        '$amount',
+                        '$date',
+                        '$payment_type',
+                        '$bill',
+                        NULL
+                    )"
+                );
             }
+
+            if (!$ins) {
+                throw new Exception('Payment insert failed');
+            }
+
+            /* ---------- Update fee_balances ONLY if fallback ---------- */
+            if ($fee_source === 'fee_balances') {
+
+                $upd = mysqli_query(
+                    $link,
+                    "UPDATE fee_balances
+                     SET Balance = Balance - $amount
+                     WHERE Id_No = '$id' AND Type = '$type'
+                     LIMIT 1"
+                );
+
+                if (!$upd) {
+                    throw new Exception('Fee balance update failed');
+                }
+            }
+
+            mysqli_commit($link);
+
+            /* ---------- SMS (unchanged logic) ---------- */
+            if (str_contains($mobile, ',')) {
+                $mobile = explode(',', $mobile, 2)[0];
+            } elseif (str_contains($mobile, ' ')) {
+                $mobile = explode(' ', $mobile, 2)[0];
+            }
+
+            $text = "Dear parent, We received with thanks, the amount of Rs $amount towards the $type of your child $name on "
+                . format_date($_SESSION['DOP'])
+                . " Principal, Victory High School, KDR";
+
+            echo '<a href="http://www.alots.in/sms-panel/api/http/index.php?username=victoryschool&apikey=2A26D-FA42A&apirequest=Text&sender=VICKDR&mobile=' . $mobile . '&message=' . $text . '&route=TRANS&TemplateID=1707173494146888652&format=JSON" id="sms_link" hidden></a>';
+
+            echo '<script>
+                async function send(url){ await fetch(url); }
+                send(document.getElementById("sms_link").href);
+            </script>';
+
+            echo "<script>alert('Fee Inserted Successfully!!')</script>";
+        } catch (Exception $e) {
+
+            mysqli_rollback($link);
+            error_log($e->getMessage());
+
+            echo "<script>alert('Payment failed. Please try again.')</script>";
         }
-
-        mysqli_commit($link);
-
-        /* ---------- SMS (unchanged logic) ---------- */
-        if (str_contains($mobile, ',')) {
-            $mobile = explode(',', $mobile, 2)[0];
-        } elseif (str_contains($mobile, ' ')) {
-            $mobile = explode(' ', $mobile, 2)[0];
-        }
-
-        $text = "Dear parent, We received with thanks, the amount of Rs $amount towards the $type of your child $name on "
-            . format_date($_SESSION['DOP'])
-            . " Principal, Victory High School, KDR";
-
-        echo '<a href="http://www.alots.in/sms-panel/api/http/index.php?username=victoryschool&apikey=2A26D-FA42A&apirequest=Text&sender=VICKDR&mobile=' . $mobile . '&message=' . $text . '&route=TRANS&TemplateID=1707173494146888652&format=JSON" id="sms_link" hidden></a>';
-
-        echo '<script>
-            async function send(url){ await fetch(url); }
-            send(document.getElementById("sms_link").href);
-        </script>';
-
-        echo "<script>alert('Fee Inserted Successfully!!')</script>";
-    } catch (Exception $e) {
-
-        mysqli_rollback($link);
-        error_log($e->getMessage());
-
-        echo "<script>alert('Payment failed. Please try again.')</script>";
     }
 }
 
@@ -498,6 +631,10 @@ if (isset($_POST['add'])) {
                 <div class="user-details">
                     <div class="input-box">
                         <span class="details">Fee Type<span class="required">*</span></span>
+                        <?php if (isset($advance_payment_entry)) { ?>
+                            <input type="hidden" name="Type" value="Admission Fee" />
+                            <input type="hidden" name="Advance_Amount" value="<?php echo htmlspecialchars($advance_amount, ENT_QUOTES); ?>" />
+                        <?php } ?>
                         <select name="Type" id="type">
                             <option value="selectfeetype" disabled selected>-- Select Fee Type --</option>
                             <option value="School Fee" <?php if (isset($type) && $type == "School Fee") {
@@ -586,8 +723,14 @@ if (isset($_POST['add'])) {
                     </div>
                     <div class="input-box">
                         <span class="details">Date of Payment</span>
-                        <input type="date" name="DOP" id="dop" value="<?php if (isset($_SESSION['DOP'])) {
-                                                                            echo $_SESSION['DOP'];
+                        <input type="date" name="DOP" id="dop" value="<?php if (isset($_POST['add'])) {
+                                                                            echo htmlspecialchars($_POST['DOP'] ?? '', ENT_QUOTES);
+                                                                        } else if (isset($date_raw) && $date_raw != '') {
+                                                                            echo htmlspecialchars($date_raw, ENT_QUOTES);
+                                                                        } else if (isset($date) && $date != '') {
+                                                                            echo htmlspecialchars($date, ENT_QUOTES);
+                                                                        } else if (isset($_SESSION['DOP'])) {
+                                                                            echo format_date($_SESSION['DOP']);
                                                                         } else {
                                                                             echo date('Y-m-d');
                                                                         } ?>" />
@@ -608,14 +751,21 @@ if (isset($_POST['add'])) {
                                                                 echo "";
                                                             } ?>" name="Fee_Balance" readonly />
                     </div>
+                    <?php if (isset($transaction_id) && $transaction_id != "") { ?>
+                        <div class="input-box">
+                            <span class="details">Transaction Id</span>
+                            <input type="text" value="<?php echo htmlspecialchars($transaction_id, ENT_QUOTES); ?>" disabled />
+                            <input type="hidden" name="Transaction_Id" value="<?php echo htmlspecialchars($transaction_id, ENT_QUOTES); ?>" />
+                        </div>
+                    <?php } ?>
                     <div class="gender-details">
                         <span class="gender-title">Mode of Payment</span>
                         <div class="category">
-                            <input type="radio" id="cash" value="Cash" name="Payment_Type" <?php if (!isset($_SESSION['Payment_Type']) || (isset($_SESSION['Payment_Type']) && $_SESSION['Payment_Type'] == "Cash")) {
+                            <input type="radio" id="cash" value="Cash" name="Payment_Type" <?php if ((isset($payment_type) && $payment_type == "Cash") || (!isset($payment_type) && (!isset($_SESSION['Payment_Type']) || (isset($_SESSION['Payment_Type']) && $_SESSION['Payment_Type'] == "Cash")))) {
                                                                                                 echo "checked";
                                                                                             } ?> />
                             <span><label for="cash">Cash</label></span>
-                            <input type="radio" id="upi" value="UPI" name="Payment_Type" <?php if (isset($_SESSION['Payment_Type']) && $_SESSION['Payment_Type'] == "UPI") {
+                            <input type="radio" id="upi" value="UPI" name="Payment_Type" <?php if ((isset($payment_type) && $payment_type == "UPI") || (!isset($payment_type) && isset($_SESSION['Payment_Type']) && $_SESSION['Payment_Type'] == "UPI")) {
                                                                                                 echo "checked";
                                                                                             } ?> />
                             <span><label for="upi">UPI</label></span>
