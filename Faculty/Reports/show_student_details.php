@@ -71,7 +71,17 @@ error_reporting(0);
         <tr>
           <th class="bg-secondary text-light">Id No.</th>
           <td width="100%"><?php echo $_SESSION['Stu_Id_No']; ?></td>
-          <td rowspan="3" colspan="2" align="center"><img src="/Futuregen/Images/stu_img/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Student Image" width="100px"></td>
+          <?php
+          if (file_exists("../../Images/stu_img/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
+          ?>
+            <td rowspan="3" colspan="2" align="center"><img src="/Futuregen/Images/stu_img/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Student Image" width="150px"></td>
+          <?php
+          } else {
+          ?>
+            <td rowspan="3" colspan="2" align="center"><img src="/Futuregen/Images/stu_img/not_photo.jpg" alt="Student Image" width="100px"></td>
+          <?php
+          }
+          ?>
         </tr>
         <tr>
           <th class="bg-secondary text-light">Admission No.</th>
@@ -84,8 +94,32 @@ error_reporting(0);
         <tr>
           <th class="bg-secondary text-light">Surname</th>
           <td><?php echo $_SESSION['Sur_Name']; ?></td>
-          <td rowspan="3"><img src="/Futuregen/Images/parent_img_male/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Father Image" width="100px"></td>
-          <td rowspan="3"><img src="/Futuregen/Images/parent_img_female/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Mother Image" width="100px"></td>
+          <td rowspan="3">
+            <?php
+            if (file_exists("../../Images/parent_img_male/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
+            ?>
+              <img src="/Futuregen/Images/parent_img_male/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Father Image" width="150px">
+            <?php
+            } else {
+            ?>
+              <img src="/Futuregen/Images/parent_img_male/not_photo.jpg" alt="Father Image" width="100px">
+            <?php
+            }
+            ?>
+          </td>
+          <td rowspan="3">
+            <?php
+            if (file_exists("../../Images/parent_img_female/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
+            ?>
+              <img src="/Futuregen/Images/parent_img_female/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Mother Image" width="150px">
+            <?php
+            } else {
+            ?>
+              <img src="/Futuregen/Images/parent_img_female/not_photo.jpg" alt="Mother Image" width="100px">
+            <?php
+            }
+            ?>
+          </td>
         </tr>
         <tr>
           <th class="bg-secondary text-light">Father Name</th>

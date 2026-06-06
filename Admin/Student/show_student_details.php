@@ -84,7 +84,7 @@ error_reporting(0);
           <?php
           if (file_exists("../../Images/stu_img/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
           ?>
-            <td rowspan="3" colspan="2" align="center"><img src="/Futuregen/Images/stu_img/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Student Image" width="100px"></td>
+            <td rowspan="3" colspan="2" align="center"><img src="/Futuregen/Images/stu_img/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Student Image" width="150px"></td>
           <?php
           } else {
           ?>
@@ -108,7 +108,7 @@ error_reporting(0);
             <?php
             if (file_exists("../../Images/parent_img_male/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
             ?>
-              <img src="/Futuregen/Images/parent_img_male/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Father Image" width="100px">
+              <img src="/Futuregen/Images/parent_img_male/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Father Image" width="150px">
             <?php
             } else {
             ?>
@@ -121,7 +121,7 @@ error_reporting(0);
             <?php
             if (file_exists("../../Images/parent_img_female/" . $_SESSION['Stu_Id_No'] . ".jpg")) {
             ?>
-              <img src="/Futuregen/Images/parent_img_female/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Mother Image" width="100px">
+              <img src="/Futuregen/Images/parent_img_female/<?php echo $_SESSION['Stu_Id_No'] . ".jpg" ?>" alt="Mother Image" width="150px">
             <?php
             } else {
             ?>
