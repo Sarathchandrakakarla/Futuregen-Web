@@ -146,9 +146,6 @@ if (!$_SESSION['Admin_Id_No']) {
     <?php
     include 'sidebar.php';
     ?>
-    <div class="system-notice">
-        System access has been updated to improve security and control.
-    </div>
     <div class="container img-container" data-aos="fade-in">
         <img src="<?= $_SESSION['school_db']['Media_Root_Dir'] ?>/Victory Logo.png" alt="Logo" width="200px">
     </div>
