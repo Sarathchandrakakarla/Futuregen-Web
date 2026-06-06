@@ -244,14 +244,11 @@ error_reporting(0);
     <div class="container table-container" id="table-container">
         <table hidden>
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td colspan="4"></td>
                 <td style="font-size:30px;" colspan="4"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></td>
             </tr>
             <tr>
-                <td style="font-size:20px;color:red" id="label"></td>
+                <td style="font-size:20px;color:red" id="report_label"></td>
                 <td id="txt_label" style="font-size:20px;"></td>
             </tr>
         </table>
@@ -260,7 +257,7 @@ error_reporting(0);
                 <th>S.No</th>
                 <th>Id No.</th>
                 <th>Name</th>
-                <th id="label" hidden>Class</th>
+                <th id="label" hidden>Route</th>
                 <th id="label2" hidden>Class</th>
                 <th>Balance</th>
                 <th>SMS Link</th>
@@ -327,7 +324,6 @@ error_reporting(0);
                                         document.getElementById('class_row').hidden = 'hidden';
                                         document.getElementById('route_row').hidden = 'hidden';
                                         document.getElementById('label').hidden = '';
-                                        document.getElementById('label').innerHTML = 'Route';
                                         document.getElementById('label2').hidden = '';
                                     </script>";
                                 $routes = [];
@@ -435,7 +431,7 @@ error_reporting(0);
                                 if ($_POST['Route']) {
                                     $route = $_POST['Route'];
                                     echo "<script>document.getElementById('route').value = '" . $route . "';
-                                        document.getElementById('label2').hidden = ''
+                                        document.getElementById('label2').hidden = '';
                                         </script>";
                                     $query1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Van_Route = '$route' AND (Stu_Class LIKE '% CLASS%' OR Stu_Class = 'PreKG' OR Stu_Class = 'LKG' OR Stu_Class = 'UKG')");
                                     while ($row1 = mysqli_fetch_assoc($query1)) {
@@ -492,6 +488,7 @@ error_reporting(0);
                                                 <td>' . $i . '</td>
                                                 <td>' . $id . '</td>
                                                 <td>' . $names[$id] . '</td>
+                                                <td hidden></td>
                                                 <td>' . $classes[$id] . '</td>
                                                 <td>' . $balances[$id] . '</td>
                                                 <td>';
@@ -535,9 +532,8 @@ error_reporting(0);
                                 echo "<script>
                                     document.getElementById('class_row').hidden = 'hidden';
                                     document.getElementById('route_row').hidden = 'hidden';
-                                    document.getElementById('label').hidden = '';
-                                    document.getElementById('label').innerHTML = 'Class';
-                                    document.getElementById('label2').hidden = 'hiddden';
+                                    document.getElementById('label').hidden = 'hidden';
+                                    document.getElementById('label2').hidden = '';
                                     </script>";
                                 $classes = ['PreKG', 'LKG', 'UKG'];
                                 for ($j = 1; $j <= 10; $j++) {
@@ -607,6 +603,7 @@ error_reporting(0);
                                                     <td>' . $i . '</td>
                                                     <td>' . $id . '</td>
                                                     <td>' . $names[$id] . '</td>
+                                                    <td hidden></td>
                                                     <td>' . $class . ' ' . $section . '</td>
                                                     <td>' . $balances[$id] . '</td>
                                                     <td>';
@@ -643,7 +640,8 @@ error_reporting(0);
                                 if ($_POST['Class']) {
                                     $class = $_POST['Class'];
                                     echo "<script>document.getElementById('class').value = '" . $class . "';
-                                        document.getElementById('label2').hidden = 'hiddden';
+                                        document.getElementById('label').hidden = 'hidden';
+                                        document.getElementById('label2').hidden = 'hidden';
                                         </script>";
                                     if ($_POST['Section']) {
                                         $section = $_POST['Section'];
@@ -702,6 +700,8 @@ error_reporting(0);
                                                     <td>' . $i . '</td>
                                                     <td>' . $id . '</td>
                                                     <td>' . $names[$id] . '</td>
+                                                    <td hidden></td>
+                                                    <td hidden></td>
                                                     <td>' . $balances[$id] . '</td>
                                                     <td>';
                                                 if (can('create', MENU_ID)) {
@@ -884,34 +884,22 @@ error_reporting(0);
     <!-- Export Table to Excel -->
     <script type="text/javascript">
         $('#export').on('click', function() {
-            filename = "Fee Balances List"
-            var downloadLink;
-            var dataType = 'application/vnd.ms-excel';
-            var tableSelect = document.getElementById('table-container');
-            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
-            // Specify file name
-            filename = filename ? filename + '.xls' : 'excel_data.xls';
+            filename = "Fee Balances List";
+            let hiddenColumns = ['Select All'];
 
-            // Create download link element
-            downloadLink = document.createElement("a");
-
-            document.body.appendChild(downloadLink);
-
-            if (navigator.msSaveOrOpenBlob) {
-                var blob = new Blob(['\ufeff', tableHTML], {
-                    type: dataType
-                });
-                navigator.msSaveOrOpenBlob(blob, filename);
-            } else {
-                // Create a link to the file
-                downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
-
-                // Setting the file name
-                downloadLink.download = filename;
-
-                //triggering the function
-                downloadLink.click();
+            if (document.getElementById('label').hidden) {
+                hiddenColumns.push('Route');
             }
+
+            if (document.getElementById('label2').hidden) {
+                hiddenColumns.push('Class');
+            }
+
+            exportTableToExcel({
+                tableId: 'table-container',
+                filename: filename,
+                hiddenColumns: hiddenColumns
+            });
         });
     </script>
 </body>

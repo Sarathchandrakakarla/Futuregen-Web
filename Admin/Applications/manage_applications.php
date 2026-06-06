@@ -904,10 +904,7 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
                     <div class="table-responsive" id="table-container">
                         <table hidden>
                             <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                                <td colspan="4"></td>
                                 <td style="font-size:30px;font-family:Times New Roman;" colspan="4"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></td>
                             </tr>
                             <tr></tr>
@@ -2562,44 +2559,44 @@ if (isset($input['Action']) && $input['Action'] === 'Get_Reports') {
     <!-- Export Table to Excel -->
     <script type="text/javascript">
         $('#export').on('click', function() {
-            filename = "Applications_Report";
-            var downloadLink;
-            var dataType = 'application/vnd.ms-excel';
-            var tableSelect = document.getElementById('table-container');
-            var exportTable = tableSelect.cloneNode(true);
+            // Clone original table container
+            const originalTable = document.getElementById('table-container');
 
-            exportTable.querySelectorAll('[data-column]').forEach(cell => {
-                let col = reportColumns.find(item => item.key === cell.getAttribute('data-column'));
+            const tempTable = originalTable.cloneNode(true);
+
+            // Apply existing dynamic column visibility logic
+            tempTable.querySelectorAll('[data-column]').forEach(cell => {
+
+                let col = reportColumns.find(
+                    item => item.key === cell.getAttribute('data-column')
+                );
 
                 if (col && !col.visible) {
                     cell.remove();
                 }
             });
 
-            var tableHTML = exportTable.outerHTML.replace(/ /g, '%20');
-            // Specify file name
-            filename = filename ? filename + '.xls' : 'excel_data.xls';
+            // Temporary hidden export container
+            const tempWrapper = document.createElement('div');
 
-            // Create download link element
-            downloadLink = document.createElement("a");
+            tempWrapper.id = 'temp-export-table';
 
-            document.body.appendChild(downloadLink);
+            tempWrapper.style.position = 'absolute';
+            tempWrapper.style.left = '-99999px';
+            tempWrapper.style.top = '0';
 
-            if (navigator.msSaveOrOpenBlob) {
-                var blob = new Blob(['\ufeff', tableHTML], {
-                    type: dataType
-                });
-                navigator.msSaveOrOpenBlob(blob, filename);
-            } else {
-                // Create a link to the file
-                downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+            tempWrapper.appendChild(tempTable);
 
-                // Setting the file name
-                downloadLink.download = filename;
+            document.body.appendChild(tempWrapper);
 
-                //triggering the function
-                downloadLink.click();
-            }
+            exportTableToExcel({
+                tableId: 'temp-export-table',
+                filename: 'Applications_Report',
+                hiddenColumns: ['Actions']
+            });
+
+            // Cleanup
+            tempWrapper.remove();
         });
     </script>
 

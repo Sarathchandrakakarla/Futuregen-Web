@@ -153,10 +153,7 @@ function getAcademicYear($startMonth = 4)
     <div class="container table-container" id="table-container">
         <table hidden>
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td colspan="4"></td>
                 <td style="font-size:30px;" colspan="4"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></td>
             </tr>
             <tr>
@@ -363,7 +360,7 @@ function getAcademicYear($startMonth = 4)
                                 //Arrays
                                 $classes = array("PreKG", "LKG", "UKG");
                                 $i = 1;
-                                while ($i <= 10) {
+                                while ($i <= 8) {
                                     array_push($classes, $i . " CLASS");
                                     $i++;
                                 }
@@ -382,8 +379,8 @@ function getAcademicYear($startMonth = 4)
 
                                 //For Counting Number of Students in Each Class
                                 foreach ($classes as $class) {
-                                    if ($type == "Admission Fee") {
-                                        $query1 = mysqli_query($link, "SELECT * FROM `stu_fee_master_data` WHERE Class = '$class' AND Type='Admission Fee'");
+                                    if ($type == "Admission Fee" || $type== "Hostel Fee") {
+                                        $query1 = mysqli_query($link, "SELECT * FROM `stu_fee_master_data` WHERE Class = '$class' AND Type='$type'");
                                     } else {
                                         $query1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class'");
                                     }
@@ -531,33 +528,10 @@ function getAcademicYear($startMonth = 4)
     <script type="text/javascript">
         $('#export').on('click', function() {
             filename = "<?php echo 'Consolidated_Fee_' . $type; ?>";
-            var downloadLink;
-            var dataType = 'application/vnd.ms-excel';
-            var tableSelect = document.getElementById('table-container');
-            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
-            // Specify file name
-            filename = filename ? filename + '.xls' : 'excel_data.xls';
-
-            // Create download link element
-            downloadLink = document.createElement("a");
-
-            document.body.appendChild(downloadLink);
-
-            if (navigator.msSaveOrOpenBlob) {
-                var blob = new Blob(['\ufeff', tableHTML], {
-                    type: dataType
-                });
-                navigator.msSaveOrOpenBlob(blob, filename);
-            } else {
-                // Create a link to the file
-                downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
-
-                // Setting the file name
-                downloadLink.download = filename;
-
-                //triggering the function
-                downloadLink.click();
-            }
+            exportTableToExcel({
+                tableId: 'table-container',
+                filename: filename,
+            });
         });
     </script>
 

@@ -173,10 +173,7 @@ if (isset($_POST['Action']) && $_POST['Action'] == "Delete") {
     <div class="container table-container" id="table-container">
         <table hidden>
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td colspan="4"></td>
                 <td style="font-size:30px;" colspan="4"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></td>
             </tr>
         </table>
@@ -372,33 +369,10 @@ if (isset($_POST['Action']) && $_POST['Action'] == "Delete") {
     <script type="text/javascript">
         $('#export').on('click', function() {
             filename = 'Class Teacher List';
-            var downloadLink;
-            var dataType = 'application/vnd.ms-excel';
-            var tableSelect = document.getElementById('table-container');
-            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
-            // Specify file name
-            filename = filename ? filename + '.xls' : 'excel_data.xls';
-
-            // Create download link element
-            downloadLink = document.createElement("a");
-
-            document.body.appendChild(downloadLink);
-
-            if (navigator.msSaveOrOpenBlob) {
-                var blob = new Blob(['\ufeff', tableHTML], {
-                    type: dataType
-                });
-                navigator.msSaveOrOpenBlob(blob, filename);
-            } else {
-                // Create a link to the file
-                downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
-
-                // Setting the file name
-                downloadLink.download = filename;
-
-                //triggering the function
-                downloadLink.click();
-            }
+            exportTableToExcel({
+                tableId: 'table-container',
+                filename: filename,
+            });
         });
     </script>
 

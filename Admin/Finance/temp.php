@@ -218,68 +218,6 @@ if (isset($_POST['Action']) && $_POST['Action'] == "View" && isset($_POST['Date'
             ";
 
         echo $text;
-        /*
-        if ($sql && $sql1) {
-            if (mysqli_num_rows($sql) == 0 && mysqli_num_rows($sql1) == 0) {
-                echo "";
-            } else {
-                $text = "";
-                
-                $vehicle_total = 0;
-                
-                if (mysqli_num_rows($sql1) > 0) {
-                    $vehicle_details = array();
-                    while ($row = mysqli_fetch_assoc($sql1)) {
-                        $temp = array();
-                        array_push($temp, $row['Id_No']);
-                        array_push($temp, $row['First_Name']);
-                        array_push($temp, $row['Class'] . ' ' . $row['Section']);
-                        array_push($temp, $row['Fee']);
-                        array_push($temp, $row['Bill_No']);
-                        $vehicle_total += (int)$row['Fee'];
-                        array_push($vehicle_details, $temp);
-                    }
-                    $text .= "
-                <tr>
-                    <td colspan='6' style='text-align:center'><b>Vehicle Fee</b></td>
-                </tr>
-                <tr>";
-                    $i = 1;
-                    foreach ($vehicle_details as $vehicle_detail) {
-                        $text .= "<td>" . $i . "</td>";
-                        foreach ($vehicle_detail as $col) {
-                            $text .= "<td>" . $col . "</td>";
-                        }
-                        $text .= "<td><label style='opacity:0' id='fee_type'>Vehicle Fee</label><i class='bx bx-trash delete' onclick='delete_row(this)'></i></td>";
-                        $text .= "</tr>";
-                        $i++;
-                    }
-                    $text .= "
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    
-                    <td><b>Total</b></td>
-                    <td><b>" . $vehicle_total . "</b></td>
-                    
-                </tr>";
-                }
-                $text .= "
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td style='text-align:center;'><b>Grand Total</b></td>
-                    <td><b>" . ($total + $vehicle_total) . "</b></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                ";
-                echo $text;
-            }
-        }
-        */
     }
 }
 

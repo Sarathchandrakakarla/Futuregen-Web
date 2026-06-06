@@ -123,3 +123,4 @@ while ($menu_row = mysqli_fetch_assoc($menu_query)) {
   </ul>
 </div>
 <script src="/Futuregen/js/script.js"></script>
+<script src="/Futuregen/js/export_xlsx.js"></script>

@@ -145,10 +145,7 @@ error_reporting(0);
         <div class="container table-container" id="table-container">
             <table hidden>
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td colspan="4"></td>
                     <td style="font-size:30px;" colspan="4"><?= htmlspecialchars($_SESSION['school_db']['display_name']) ?></td>
                 </tr>
                 <tr>
@@ -244,19 +241,10 @@ error_reporting(0);
             stusection = '<?php echo $section; ?>';
             filename = stuclass + stusection;
 
-            // Select table
-            var tableSelect = document.getElementById('table-container');
-
-            // Use SheetJS to export the table as an Excel file
-            var wb = XLSX.utils.table_to_book(tableSelect, {
-                sheet: 'Sheet1'
+            exportTableToExcel({
+                tableId: 'table-container',
+                filename: filename,
             });
-
-            // Specify filename
-            filename = filename ? filename + '.xlsx' : 'excel_data.xlsx';
-
-            // Download the file
-            XLSX.writeFile(wb, filename);
         });
     </script>
 
