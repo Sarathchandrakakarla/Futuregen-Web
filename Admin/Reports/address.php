@@ -475,7 +475,7 @@ error_reporting(0);
                                         array_push($routes, $v_row['Van_Route']);
                                     }
                                     foreach ($routes as $r) {
-                                        $sql = "SELECT * FROM `student_master_data` WHERE Van_Route LIKE '%$r%' AND (Stu_Class LIKE '%CLASS%' OR Stu_Class ='PreKG' OR Stu_Class ='LKG' OR Stu_Class ='UKG')";
+                                        $sql = "SELECT * FROM `student_master_data` WHERE Van_Route = '$r' AND (Stu_Class LIKE '%CLASS%' OR Stu_Class ='PreKG' OR Stu_Class ='LKG' OR Stu_Class ='UKG')";
                                         $result = mysqli_query($link, $sql);
                                         echo '<tr>
                                                     <td style="font-size:20px;color:red" id="label">Route: </td>
