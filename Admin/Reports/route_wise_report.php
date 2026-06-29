@@ -303,7 +303,7 @@ if (isset($_POST['add'])) {
             if ($(this).data('allowed') !== 1) {
                 return false;
             }
-            route = $(this).parent().siblings().eq(1).text();
+            route = $(this).parent().parent().siblings().eq(1).text();
             if (!confirm('Confirm to delete Route: ' + route + '?')) {
                 return;
             } else {
