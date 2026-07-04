@@ -514,8 +514,8 @@ if (isset($_POST['Promotion'])) {
 
     //Updating Actual Fee and Current Balance in stu_fee_master_data
     foreach ($classes as $class) {
-      $sql = mysqli_query($link, "UPDATE `stu_fee_master_data` SET Actual = '$actual[$class]',Current_Balance = '$actual[$class]' WHERE Class = '$class'");
-      $sql1 = mysqli_query($link, "UPDATE `stu_fee_master_data` SET Total = Last_Balance + Current_Balance WHERE Class = '$class'");
+      $sql = mysqli_query($link, "UPDATE `stu_fee_master_data` SET Actual = '$actual[$class]',Current_Balance = '$actual[$class]' WHERE Class = '$class' AND Type = 'School Fee'");
+      $sql1 = mysqli_query($link, "UPDATE `stu_fee_master_data` SET Total = Last_Balance + Current_Balance WHERE Class = '$class' AND Type = 'School Fee'");
       if ($sql && $sql1) {
         $actual_status = true;
       } else {
