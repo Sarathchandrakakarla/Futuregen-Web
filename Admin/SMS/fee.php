@@ -851,15 +851,15 @@ error_reporting(0);
             $(".student:checked").each(function() {
                 if (!all_students.checked) {
                     if (type.value == "Vehicle Fee") {
-                        absentees.push($(this).parent().siblings().eq(5).children().attr('href'));
+                        absentees.push($(this).parent().siblings().eq(6).children().attr('href'));
                     } else {
-                        absentees.push($(this).parent().siblings().eq(4).children().attr('href'));
+                        absentees.push($(this).parent().siblings().eq(6).children().attr('href'));
                     }
                 } else {
                     if (type.value == "Vehicle Fee") {
                         absentees.push($(this).parent().siblings().eq(6).children().attr('href'));
                     } else {
-                        absentees.push($(this).parent().siblings().eq(5).children().attr('href'));
+                        absentees.push($(this).parent().siblings().eq(6).children().attr('href'));
                     }
                 }
                 //mywin = window.open($(this).parent().siblings().eq(4).children().attr('href'), '_blank')
