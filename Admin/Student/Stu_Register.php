@@ -74,6 +74,21 @@ if (isset($_POST['app_id'])) {
     }
 }
 
+$next_student_id = 'FGST0001';
+$student_id_query = mysqli_query($link, "SELECT Id_No FROM student_master_data ORDER BY Id_No DESC LIMIT 1");
+
+if ($student_id_query) {
+    $student_id_row = mysqli_fetch_assoc($student_id_query);
+    $highest_student_id = $student_id_row['Id_No'] ?? '';
+
+    if (preg_match('/^FGST(\d{4})$/', $highest_student_id, $matches)) {
+        $next_student_number = (int) $matches[1] + 1;
+        $next_student_id = 'FGST' . sprintf('%04d', $next_student_number);
+    }
+}
+
+$id_no_value = isset($_POST['Id_No']) ? $_POST['Id_No'] : $next_student_id;
+
 error_reporting(0);
 ?>
 
@@ -283,7 +298,7 @@ error_reporting(0);
                 <div class="user-details">
                     <div class="input-box">
                         <span class="details">Id No. <span class="required">*</span></span>
-                        <input type="text" placeholder="Enter Id No" id="id_no" name="Id_No" oninput="this.value = this.value.toUpperCase()" required />
+                        <input type="text" placeholder="Enter Id No" id="id_no" name="Id_No" value="<?= htmlspecialchars($id_no_value) ?>" oninput="this.value = this.value.toUpperCase()" required />
                     </div>
                     <div class="input-box">
                         <span class="details">Admission No.
