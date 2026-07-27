@@ -647,7 +647,7 @@ function month($date)
                                 $marks[$id] = $temp;
                             }
 
-                            if ($report_type == "Nomral") {
+                            if ($report_type == "Normal") {
                                 echo '
                                 <div style="margin-left:3.3cm;padding-top:' . ($report_type == "Normal" ? '2.1' : '1.8') . 'cm;margin-bottom:' . ($report_type == "Normal" ? '0.7' : '0.4') . 'cm;">
                                     <table>
