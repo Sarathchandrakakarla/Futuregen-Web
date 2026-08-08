@@ -347,7 +347,7 @@ error_reporting(0);
 
                                         //Queries
                                         if ($fee_for == "For_Report") {
-                                            $sql1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class' AND Stu_Section = '$section' ORDER BY Id_No");
+                                            $sql1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class' AND Stu_Section = '$section'" . ($type == "Hostel Fee" ? " AND Student_Type = 'Hosteller'" : "") . " ORDER BY Id_No"); // Hostel Fee: only hostellers
                                         } else if ($fee_for == "For_Phone") {
                                             $sql1 = mysqli_query($link, "SELECT * FROM `current_strength` WHERE Class = '$class' AND Section = '$section'");
                                         }
@@ -374,6 +374,15 @@ error_reporting(0);
 
                                         while ($row2 = mysqli_fetch_assoc($sql2)) {
                                             $actual = $row2['Fee'];
+                                        }
+
+                                        if ($type == "Book Fee") { // Book Fee: keep only students having Book Fee entry
+                                            foreach ($ids as $key => $id) {
+                                                $book_sql = mysqli_query($link, "SELECT Id_No FROM `stu_fee_master_data` WHERE Id_No = '$id' AND Type = 'Book Fee'");
+                                                if (mysqli_num_rows($book_sql) == 0) {
+                                                    unset($ids[$key]);
+                                                }
+                                            }
                                         }
 
                                         foreach ($ids as $id) {
@@ -468,7 +477,7 @@ error_reporting(0);
                                     $original_ids = array();
                                     $original_classes = array();
                                     //Queries
-                                    $sql1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Van_Route = '$route' AND (((Stu_Class LIKE '%CLASS%') OR (Stu_Class LIKE '%KG')) AND (Stu_Class NOT LIKE '%DROP%')) ORDER BY Id_No");
+                                    $sql1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Van_Route = '$route' AND (((Stu_Class LIKE '%CLASS%') OR (Stu_Class LIKE '%KG')) AND (Stu_Class NOT LIKE '%DROP%'))" . ($type == "Hostel Fee" ? " AND Student_Type = 'Hosteller'" : "") . " ORDER BY Id_No"); // Hostel Fee: only hostellers
                                     while ($row1 = mysqli_fetch_assoc($sql1)) {
                                         if ($fee_for == "For_Report") {
                                             array_push($ids, $row1['Id_No']);
@@ -494,6 +503,14 @@ error_reporting(0);
                                                         $classes[$original_id] = [$row2['Stu_Class'], $row2['Stu_Section']];
                                                     }
                                                 }
+                                            }
+                                        }
+                                    }
+                                    if ($type == "Book Fee") { // Book Fee: keep only students having Book Fee entry
+                                        foreach ($ids as $key => $id) {
+                                            $book_sql = mysqli_query($link, "SELECT Id_No FROM `stu_fee_master_data` WHERE Id_No = '$id' AND Type = 'Book Fee'");
+                                            if (mysqli_num_rows($book_sql) == 0) {
+                                                unset($ids[$key]);
                                             }
                                         }
                                     }
@@ -586,7 +603,7 @@ error_reporting(0);
                                     $original_ids = array();
                                     $original_classes = array();
                                     foreach ($routes as $route) {
-                                        $sql1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Van_Route = '$route' AND (((Stu_Class LIKE '%CLASS%') OR (Stu_Class LIKE '%KG')) AND (Stu_Class NOT LIKE '%DROP%')) ORDER BY Id_No");
+                                        $sql1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Van_Route = '$route' AND (((Stu_Class LIKE '%CLASS%') OR (Stu_Class LIKE '%KG')) AND (Stu_Class NOT LIKE '%DROP%'))" . ($type == "Hostel Fee" ? " AND Student_Type = 'Hosteller'" : "") . " ORDER BY Id_No"); // Hostel Fee: only hostellers
                                         while ($row1 = mysqli_fetch_assoc($sql1)) {
                                             if ($fee_for == "For_Report") {
                                                 array_push($ids, $row1['Id_No']);
@@ -631,6 +648,14 @@ error_reporting(0);
                                                     $classes[$original_id] = [$row2['Stu_Class'], $row2['Stu_Section']];
                                                     $id_routes[$original_id] = $row2['Van_Route'];
                                                 }
+                                            }
+                                        }
+                                    }
+                                    if ($type == "Book Fee") { // Book Fee: keep only students having Book Fee entry
+                                        foreach ($ids as $key => $id) {
+                                            $book_sql = mysqli_query($link, "SELECT Id_No FROM `stu_fee_master_data` WHERE Id_No = '$id' AND Type = 'Book Fee'");
+                                            if (mysqli_num_rows($book_sql) == 0) {
+                                                unset($ids[$key]);
                                             }
                                         }
                                     }
@@ -711,7 +736,7 @@ error_reporting(0);
                                         foreach ($sections as $section) {
                                             //Queries
                                             if ($fee_for == "For_Report") {
-                                                $sql1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class' AND Stu_Section = '$section' ORDER BY Id_No");
+                                                $sql1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class' AND Stu_Section = '$section'" . ($type == "Hostel Fee" ? " AND Student_Type = 'Hosteller'" : "") . " ORDER BY Id_No"); // Hostel Fee: only hostellers
                                             } else if ($fee_for == "For_Phone") {
                                                 $sql1 = mysqli_query($link, "SELECT * FROM `current_strength` WHERE Class = '$class' AND Section = '$section'");
                                             }
@@ -741,6 +766,15 @@ error_reporting(0);
 
                                             while ($row2 = mysqli_fetch_assoc($sql2)) {
                                                 $actual = $row2['Fee'];
+                                            }
+                                        }
+                                    }
+
+                                    if ($type == "Book Fee") { // Book Fee: keep only students having Book Fee entry
+                                        foreach ($ids as $key => $id) {
+                                            $book_sql = mysqli_query($link, "SELECT Id_No FROM `stu_fee_master_data` WHERE Id_No = '$id' AND Type = 'Book Fee'");
+                                            if (mysqli_num_rows($book_sql) == 0) {
+                                                unset($ids[$key]);
                                             }
                                         }
                                     }

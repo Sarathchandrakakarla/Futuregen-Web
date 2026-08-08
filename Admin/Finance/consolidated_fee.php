@@ -379,8 +379,10 @@ function getAcademicYear($startMonth = 4)
 
                                 //For Counting Number of Students in Each Class
                                 foreach ($classes as $class) {
-                                    if ($type == "Admission Fee" || $type== "Hostel Fee") {
+                                    if ($type == "Admission Fee") {
                                         $query1 = mysqli_query($link, "SELECT * FROM `stu_fee_master_data` WHERE Class = '$class' AND Type='$type'");
+                                    } else if ($type == "Hostel Fee") {
+                                        $query1 = mysqli_query($link, "SELECT * FROM `student_master_data` smd JOIN `stu_fee_master_data` sfmd ON smd.Id_No = sfmd.Id_No WHERE smd.Stu_Class = '$class' AND smd.Student_Type = 'Hosteller' AND sfmd.Type='$type'");
                                     } else {
                                         $query1 = mysqli_query($link, "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class'");
                                     }
