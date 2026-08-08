@@ -345,8 +345,6 @@ error_reporting(0);
                         } else if (($('#subject').val() != null || $('#subject').val() != '') && ($('#new_sub').val() != null || $('#new_sub').val() != '')) {
                             sub = $('#new_sub').val();
                         }
-                        console.log(sub)
-                        return;
                         if ($('#max').val() == "") {
                             alert('Please Enter Max Marks!');
                         } else {
