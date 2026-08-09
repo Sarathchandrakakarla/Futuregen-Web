@@ -1,17 +1,8 @@
 <?php
-/*
-Marklist
-width:22.70cm
-height:16.00cm
-left:1.50cm
-right:1.50cm
-top:0.80cm
-bottom:0.80cm
-*/
 include_once('../../link.php');
 include_once('../includes/rbac_helper.php');
 
-define('MENU_ID', 24);
+define('MENU_ID', 23);
 
 requireLogin();
 requireMenuAccess(MENU_ID);
@@ -151,18 +142,6 @@ function month($date)
             <div class="row justify-content-center mt-4">
                 <div class="col-lg-3">
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="report_type" id="normal" onchange="stuType()" checked value="Normal">
-                        <label class="form-check-label" for="normal">Normal</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="report_type" id="gpa" onchange="stuType()" value="GPA">
-                        <label class="form-check-label" for="gpa">GPA</label>
-                    </div>
-                </div>
-            </div>
-            <div class="row justify-content-center mt-2">
-                <div class="col-lg-3">
-                    <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="stu_type" id="class_wise" onchange="stuType()" checked value="Class_Wise">
                         <label class="form-check-label" for="class_wise">Class Wise</label>
                     </div>
@@ -220,29 +199,16 @@ function month($date)
         </div>
     </form>
     <div class="container">
-        <div class="row justify-content-center mt-3">
-            <div class="col-lg-5" style="color: red;">
-                NOTE: 1. Please Give Margin: Minimum in Page Setup <br>
-                2. Place the ribbon at "scholastic" word in mark list
-            </div>
-        </div>
-    </div>
-    <div class="container">
         <div class="row justify-content-center mt-4">
             <div class="col-lg-3">
                 <h3><b>Mark List</b></h3>
             </div>
         </div>
     </div>
-    <div class="container table-container" id="table-container">
+    <div class="container table-container" id="tbody">
         <?php
 
         if (isset($_POST['Ok'])) {
-            if (!can('view', MENU_ID)) {
-                echo "<script>alert('You don\'t have permission to view this report');
-                            location.replace('" . $_SERVER['PHP_SELF'] . "')</script>";
-                exit;
-            }
             $months = array(
                 'June',
                 'July',
@@ -280,10 +246,6 @@ function month($date)
                 array_push($mon_arr, $mon);
             }
             $stu_type = $_POST['stu_type'];
-            $report_type = $_POST['report_type'];
-            echo "<script>
-                document.getElementById('" . strtolower($report_type) . "').checked = true;
-                </script>";
             if ($stu_type == "Single") {
                 echo "<script>
                 document.getElementById('single').checked = true;
@@ -321,13 +283,13 @@ function month($date)
                         foreach (array_keys($working_days) as $month) {
                             $days_query = mysqli_query($link, "SELECT $month FROM `stu_att_master` WHERE Id_No = '$id'");
                             if (mysqli_num_rows($days_query) == 0) {
-                                $days[$id][$month]['Present'] = '';
+                                $days[$month]['Present'] = '';
                             } else {
                                 while ($days_row = mysqli_fetch_assoc($days_query)) {
                                     if ($days_row[$month] != '0') {
-                                        $days[$id][$month]['Present'] = $days_row[$month];
+                                        $days[$month]['Present'] = $days_row[$month];
                                     } else {
-                                        $days[$id][$month]['Present'] = '';
+                                        $days[$month]['Present'] = '';
                                     }
                                 }
                             }
@@ -344,166 +306,122 @@ function month($date)
                                 array_push($temp, $row2['sub' . $i]);
                             }
                             $temp['Total'] = $row2['Total'];
-                            if ($report_type == "Normal") {
-                                $percentage = round(($row2['Total'] / $total_max) * 100, 1);
-                                if ($percentage >= 80 && $percentage <= 100) {
-                                    $grade = "Excellent";
-                                } else if ($percentage >= 70 && $percentage < 80) {
-                                    $grade = "Good";
-                                } else if ($percentage >= 60 && $percentage < 70) {
-                                    $grade = "Satisfactory";
-                                } else if ($percentage >= 50 && $percentage < 60) {
-                                    $grade = "Above Average";
-                                } else if ($percentage >= 35 && $percentage < 50) {
-                                    $grade = "Average";
-                                } else if ($percentage > 0 && $percentage < 35) {
-                                    $grade = "Below Average";
-                                } else {
-                                    $grade = "";
-                                }
-                                $temp['Percentage'] = $percentage;
-                                $temp['Grade'] = $grade;
+                            $percentage = round(($row2['Total'] / $total_max) * 100, 1);
+                            if ($percentage >= 80 && $percentage <= 100) {
+                                $grade = "Excellent";
+                            } else if ($percentage >= 70 && $percentage < 80) {
+                                $grade = "Good";
+                            } else if ($percentage >= 60 && $percentage < 70) {
+                                $grade = "Satisfactory";
+                            } else if ($percentage >= 50 && $percentage < 60) {
+                                $grade = "Above Average";
+                            } else if ($percentage >= 35 && $percentage < 50) {
+                                $grade = "Average";
+                            } else if ($percentage > 0 && $percentage < 35) {
+                                $grade = "Below Average";
                             } else {
-                                $grades = array();
-                                $sub_count = count($subs);
-                                //Calculting Subject Wise Grades
-                                for ($sub = 1; $sub <= $sub_count; $sub++) {
-                                    $mark = ((int)$temp[$sub - 1] / (int)$subs[$sub - 1][1]) * 100;
-                                    if ($mark >= 91 && $mark <= 100) {
-                                        $grades['sub' . $sub] = array("A1", 10);
-                                    } else if ($mark >= 81 && $mark <= 90) {
-                                        $grades['sub' . $sub] = array("A2", 9);
-                                    } else if ($mark >= 71 && $mark <= 80) {
-                                        $grades['sub' . $sub] = array("B1", 8);
-                                    } else if ($mark >= 61 && $mark <= 70) {
-                                        $grades['sub' . $sub] = array("B2", 7);
-                                    } else if ($mark >= 51 && $mark <= 60) {
-                                        $grades['sub' . $sub] = array("C1", 6);
-                                    } else if ($mark >= 41 && $mark <= 50) {
-                                        $grades['sub' . $sub] = array("C2", 5);
-                                    } else if ($mark >= 35 && $mark <= 40) {
-                                        $grades['sub' . $sub] = array("D1", 4);
-                                    } else if ($mark >= 0 && $mark <= 34) {
-                                        $grades['sub' . $sub] = array("E", 3);
-                                    }
-                                }
-                                //Calculating Average of grade points
-                                $sum = 0;
-                                for ($sub = 1; $sub <= $sub_count; $sub++) {
-                                    $sum += $grades['sub' . $sub][1];
-                                }
-                                $avg = round($sum / $sub_count, 1);
-                                if ($avg == 10) {
-                                    $grade = "A1";
-                                } else if ($avg >= 9 && $avg < 10) {
-                                    $grade = "A2";
-                                } else if ($avg >= 8 && $avg < 9) {
-                                    $grade = "B1";
-                                } else if ($avg >= 7 && $avg < 8) {
-                                    $grade = "B2";
-                                } else if ($avg >= 6 && $avg < 7) {
-                                    $grade = "C1";
-                                } else if ($avg >= 5 && $avg < 6) {
-                                    $grade = "C2";
-                                } else if ($avg >= 4 && $avg < 5) {
-                                    $grade = "D1";
-                                } else if ($avg >= 3 && $avg < 4) {
-                                    $grade = "D2";
-                                } else if ($avg >= 0 && $avg < 3) {
-                                    $grade = "E1";
-                                }
-                                $temp['Sub_Grades'] = $grades;
-                                $temp['Grade'] = $grade;
-                                $temp['Average'] = $avg;
+                                $grade = "";
                             }
+                            $temp['Percentage'] = $percentage;
+                            $temp['Grade'] = $grade;
                         }
                         $marks[$id] = $temp;
 
-                        echo '<div style="margin-left:3.7cm;padding-top:' . ($report_type == "Normal" ? '2.1' : '1.8') . 'cm;margin-bottom:' . ($report_type == "Normal" ? '0.4' : '0.7') . 'cm;">
+
+                        echo '
+                            <div class="container" style="border:2px dashed black; margin-bottom:3%;">
+                                <table style="width:100%;">
+                                    <tr>
+                                        <td>
+                                            <img src="' . $_SESSION['school_db']['Media_Root_Dir'] . "/Victory Logo.png" . '" width="60px"/>
+                                        </td>
+                                        <td style="width:75%;height:100%;font-size:20px;font-weight:bold;text-align:center;">FUTUREGEN ENGLISH MEDIUM SCHOOL<br>RLY KODUR</td>
+                                        <td>Phone No:9558494484</td>
+                                    </tr>
+                                </table>
+                                <table style="width:100%;border:2px solid black;">
+                                    <tr>
+                                        <td style="margin-top:20px;padding-left:10px;width:65%;"><b>Student ID:         ' . $id . '</b></td>
+                                        <td style="margin-top:20px;"><b>Name:         ' . $name . '</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="margin-top:20px;padding-left:10px;width:65%;"><b>Name of the Examination:         ' . $exam . '</b></td>
+                                        <td style="margin-top:20px;padding-left:10px;"><b>Class:         ' . $class . ' ' . $section . '</b></td>
+                                    </tr>
+                                </table>
+                                <div class="main-container" style="margin-top:20px;display:flex;gap:150px;">
+                                    <div class="container" style="border:2px solid black;width:40%;height:200px;">
                                     <table>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $id . '</td>
-                                            <td></td>
-                                            <td style = "width:230px;"></td>
-                                            <td></td>
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . '">' . $name . '</td>
-                                        </tr>
-                                        <tr style = "line-height:25px;">
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $exam . '</td>
-                                            <td></td>' . ($report_type == 'GPA' ? '<td style = "width:240px;"></td>
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $max_marks . '</td>' : '<td></td>')
-                            . '<td></td>
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . '">' . $class . ' ' . $section . '</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                ';
+                                        <thead>
+                                            <th style="border-bottom:2px solid black;">Subject</th>
+                                            <th style="border-bottom:2px solid black;padding-left:50px;">Max Marks</th>
+                                            <th style="border-bottom:2px solid black;padding-left:50px;">Obtained</th>
+                                        </thead>
+                                        <tbody>
+                                    ';
                         $count = 0;
-                        echo '<div class="main-container" style="display:flex;">
-                                <div class="" style="height:5.7cm;">
-                                <table>';
                         foreach ($subs as $sub) {
                             echo '
                                         <tr>
-                                            <td style = "padding-left:' . ($report_type == "Normal" ? '15' : '0') . 'px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[0] . '</td>
-                                            <td style = "padding-left:50px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[1] . '</td>
-                                            <td style = "padding-left:' . ($report_type == "Normal" ? '65' : '55') . 'px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id][$count] . '</td>';
-                            if ($report_type == "GPA") {
-                                echo '<td style = "padding-left:65px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $grades["sub" . ($count + 1)][0] . '</td>';
-                            }
-                            echo '<tr>';
-
+                                            <td style = "font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[0] . '</td>
+                                            <td style = "font-size:13px;padding-left:55px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[1] . '</td>
+                                            <td style = "font-size:13px;padding-left:55px;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id][$count] . '</td>
+                                        <tr>';
                             $count++;
                         }
-                        echo '</table>
-                                </div>';
-                        echo '
-                                <div class="">
-                                    <table>';
+                        echo '</tbody>
+                                </table>
+                                    </div>
+                                    <div class="container" style="border:2px solid black;width:30%;height:100%;">
+                                        <table>
+                                        <thead>
+                                            <tr>
+                                                <td colspan="3" style="text-align:center;border-bottom:2px solid black;">Days</td>
+                                            </tr>
+                                            <tr>
+                                                <th style="border-bottom:2px solid black;border-right:2px solid black;">Month</th>
+                                                <th style="border-bottom:2px solid black;border-right:2px solid black;">Working</th>
+                                                <th style="border-bottom:2px solid black;">Present</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>';
                         foreach ($mon_arr as $mon) {
                             echo '
                                         <tr>
-                                            <td style = "width:220px;font-family:' . 'Arial' . '"></td>
-                                            <td style = "padding-left:10px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $days[$id][$mon]['Present'] . '</td>
-                                            <td style = "padding-left:70px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $working_days[$mon] . '</td>
+                                            <td style = "width:250px;font-size:12px;font-family:' . 'Arial' . '">' . $mon . '</td>
+                                            <td style = "font-size:10px;padding-left:10px;border-left:2px solid black;font-weight:bold;font-family:' . 'Arial' . '">' . $working_days[$mon] . '</td>
+                                            <td style = "font-size:10px;padding-left:30px;border-left:2px solid black;font-weight:bold;font-family:' . 'Arial' . '">' . $days[$id][$mon]['Present'] . '</td>
                                         <tr>';
 
                             $count++;
                             $i++;
                         }
-                        echo '
+                        echo '</body>
                                         </table>
                                     </div>
-                                </div>';
-                        if ($report_type == "Normal") {
-                            echo '
-                                <div style="height:1.5cm;">
-                                    <table>
-                                        <tr>
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Total'] . '</td>
-                                        </tr>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Percentage'] . '</td>
-                                        </tr>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Grade'] . '</td>
-                                        </tr>
-                                    </table>
                                 </div>
-                                ';
-                        } else {
-                            echo '
-                                <div style="height:1.5cm;">
-                                    <table>
-                                        <tr>
-                                            <td style = "padding-left:1.5cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Total'] . '</td>
-                                            <td style = "padding-left:2cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Grade'] . '</td>
-                                            <td style = "padding-left:2.2cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Average'] . '</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                ';
-                        }
+                                <table style="padding-left:50px;margin-top:-50px;">
+                                    <tr>
+                                        <td><b style="padding-right:75px;">Total</b>' . $marks[$id]['Total'] . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b style="padding-right:35px;">Percentage</b>' . $marks[$id]['Percentage'] . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b style="padding-right:65px;">Grade</b>' . $marks[$id]['Grade'] . '</td>
+                                    </tr>
+                                </table>
+                                <table style="padding-top:40px;">
+                                    <tr>
+                                        <td style="width:40%;">Class Teacher</td>
+                                        <td style="width:70%;">
+                                        <img src="/Viswateja/Images/sign.png" width="70px" style="bottom:30px;left:80px;position:relative;" />
+                                        Head Master</td>
+                                        <td>Parent/Guardian</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            ';
                     } else {
                         echo "<script>alert('Please Select Exam!!')</script>";
                     }
@@ -514,11 +432,22 @@ function month($date)
                 if ($_POST['Class']) {
                     $class = $_POST['Class'];
                     echo "<script>document.getElementById('class').value = '" . $class . "'</script>";
+                    $s = mysqli_query($link, "SELECT * FROM `class_wise_examination` WHERE Class = '$class'");
+                    echo "<script>document.getElementById('exam').innerHTML = '';</script>";
+                    if (mysqli_num_rows($s) > 0) {
+                        echo "<script>$('#exam').html('<option value=" . 'selectexam' . " disabled selected>--Select Exam--</option>');</script>";
+                        while ($r = mysqli_fetch_assoc($s)) {
+                            echo "<script>$('#exam').append('<option value=' + '" . $r['Exam'] . "' + '>" . $r['Exam'] . "</option>');</script>";
+                        }
+                    } else {
+                        echo "<script>$('#exam').html('<option selected disabled>No Exam Found</option>');</script>";
+                    }
                     if ($_POST['Section']) {
                         $section = $_POST['Section'];
                         echo "<script>document.getElementById('sec').value = '" . $section . "'</script>";
                         if ($_POST['Exam']) {
                             $exam = $_POST['Exam'];
+                            echo "<script>document.getElementById('exam').value = '" . $exam . "'</script>";
 
                             //Arrays
                             $ids = array();
@@ -529,8 +458,6 @@ function month($date)
                             //Queries
                             $query1 = mysqli_query($link, "SELECT Id_No,First_Name FROM `student_master_data` WHERE Stu_Class = '$class' AND Stu_Section = '$section'");
                             $query2 = mysqli_query($link, "SELECT Subjects,Max_Marks FROM `class_wise_subjects` WHERE Class = '$class' AND Exam = '$exam'");
-                            $query3 = mysqli_query($link, "SELECT Max_Marks FROM `class_wise_examination` WHERE Class = '$class' AND Exam = '$exam'");
-                            $max_marks = mysqli_fetch_row($query3)[0];
 
                             while ($row1 = mysqli_fetch_assoc($query1)) {
                                 array_push($ids, $row1['Id_No']);
@@ -571,265 +498,121 @@ function month($date)
                                         array_push($temp, $row3['sub' . $i]);
                                     }
                                     $temp['Total'] = $row3['Total'];
-                                    if ($report_type == "Normal") {
-                                        $percentage = round(($row3['Total'] / $total_max) * 100, 1);
-                                        if ($percentage >= 80 && $percentage <= 100) {
-                                            $grade = "Excellent";
-                                        } else if ($percentage >= 70 && $percentage < 80) {
-                                            $grade = "Good";
-                                        } else if ($percentage >= 60 && $percentage < 70) {
-                                            $grade = "Satisfactory";
-                                        } else if ($percentage >= 50 && $percentage < 60) {
-                                            $grade = "Above Average";
-                                        } else if ($percentage >= 35 && $percentage < 50) {
-                                            $grade = "Average";
-                                        } else if ($percentage > 0 && $percentage < 35) {
-                                            $grade = "Below Average";
-                                        } else {
-                                            $grade = "";
-                                        }
-                                        $temp['Percentage'] = $percentage;
-                                        $temp['Grade'] = $grade;
+                                    $percentage = round(($row3['Total'] / $total_max) * 100, 1);
+                                    if ($percentage >= 80 && $percentage <= 100) {
+                                        $grade = "Excellent";
+                                    } else if ($percentage >= 70 && $percentage < 80) {
+                                        $grade = "Good";
+                                    } else if ($percentage >= 60 && $percentage < 70) {
+                                        $grade = "Satisfactory";
+                                    } else if ($percentage >= 50 && $percentage < 60) {
+                                        $grade = "Above Average";
+                                    } else if ($percentage >= 35 && $percentage < 50) {
+                                        $grade = "Average";
+                                    } else if ($percentage > 0 && $percentage < 35) {
+                                        $grade = "Below Average";
                                     } else {
-                                        $grades = array();
-                                        $sub_count = count($subs);
-                                        //Calculting Subject Wise Grades
-                                        for ($sub = 1; $sub <= $sub_count; $sub++) {
-                                            $mark = ((int)$temp[$sub - 1] / (int)$subs[$sub - 1][1]) * 100;
-                                            if ($mark >= 91 && $mark <= 100) {
-                                                $grades['sub' . $sub] = array("A1", 10);
-                                            } else if ($mark >= 81 && $mark <= 90) {
-                                                $grades['sub' . $sub] = array("A2", 9);
-                                            } else if ($mark >= 71 && $mark <= 80) {
-                                                $grades['sub' . $sub] = array("B1", 8);
-                                            } else if ($mark >= 61 && $mark <= 70) {
-                                                $grades['sub' . $sub] = array("B2", 7);
-                                            } else if ($mark >= 51 && $mark <= 60) {
-                                                $grades['sub' . $sub] = array("C1", 6);
-                                            } else if ($mark >= 41 && $mark <= 50) {
-                                                $grades['sub' . $sub] = array("C2", 5);
-                                            } else if ($mark >= 35 && $mark <= 40) {
-                                                $grades['sub' . $sub] = array("D1", 4);
-                                            } else if ($mark >= 0 && $mark <= 34) {
-                                                $grades['sub' . $sub] = array("E", 3);
-                                            }
-                                        }
-                                        //Calculating Average of grade points
-                                        $sum = 0;
-                                        for ($sub = 1; $sub <= $sub_count; $sub++) {
-                                            $sum += $grades['sub' . $sub][1];
-                                        }
-                                        $avg = round($sum / $sub_count, 1);
-                                        if ($avg == 10) {
-                                            $grade = "A1";
-                                        } else if ($avg >= 9 && $avg < 10) {
-                                            $grade = "A2";
-                                        } else if ($avg >= 8 && $avg < 9) {
-                                            $grade = "B1";
-                                        } else if ($avg >= 7 && $avg < 8) {
-                                            $grade = "B2";
-                                        } else if ($avg >= 6 && $avg < 7) {
-                                            $grade = "C1";
-                                        } else if ($avg >= 5 && $avg < 6) {
-                                            $grade = "C2";
-                                        } else if ($avg >= 4 && $avg < 5) {
-                                            $grade = "D1";
-                                        } else if ($avg >= 3 && $avg < 4) {
-                                            $grade = "D2";
-                                        } else if ($avg >= 0 && $avg < 3) {
-                                            $grade = "E1";
-                                        }
-                                        $temp['Sub_Grades'] = $grades;
-                                        $temp['Grade'] = $grade;
-                                        $temp['Average'] = $avg;
+                                        $grade = "";
                                     }
+                                    $temp['Percentage'] = $percentage;
+                                    $temp['Grade'] = $grade;
                                 }
                                 $marks[$id] = $temp;
                             }
 
-                            if ($report_type == "Normal") {
-                                echo '
-                                <div style="margin-left:3.3cm;padding-top:' . ($report_type == "Normal" ? '2.1' : '1.8') . 'cm;margin-bottom:' . ($report_type == "Normal" ? '0.7' : '0.4') . 'cm;">
-                                    <table>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $ids[0] . '</td>
-                                            <td></td>
-                                            <td style = "width:230px;"></td>
-                                            <td></td>
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . '">' . $names[$ids[0]] . '</td>
-                                        </tr>
-                                        <tr style = "line-height:25px;">
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $exam . '</td>
-                                            <td></td>' . ($report_type == 'GPA' ? '<td style = "width:240px;"></td>
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $max_marks . '</td>' : '<td></td>')
-                                    . '<td></td>
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . '">' . $class . ' ' . $section . '</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                ';
-                                $count = 0;
-                                echo '<div class="main-container" style="display:flex;">
-                                <div class="" style="height:5.7cm;">
-                                <table>';
-                                foreach ($subs as $sub) {
-                                    echo '
-                                        <tr>
-                                            <td style = "padding-left: ' . ($report_type == "Normal" ? '15' : '0') . 'px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[0] . '</td>
-                                            <td style = "padding-left:' . ($report_type == "Normal" ? '75' : '50') . 'px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[1] . '</td>
-                                            <td style = "padding-left:' . ($report_type == "Normal" ? '75' : '55') . 'px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$ids[0]][$count] . '</td>';
-                                    if ($report_type == "GPA") {
-                                        echo '<td style = "padding-left:65px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $grades["sub" . ($count + 1)][0] . '</td>';
-                                    }
-                                    echo '<tr>';
-                                    $count++;
-                                }
-                                echo '</table>
-                                </div>
-                                ';
-                                echo '
-                                <div class="">
-                                    <table>';
-
-                                foreach ($mon_arr as $mon) {
-                                    echo '
-                                        <tr>
-                                            <td style = "width:250px;font-family:' . 'Arial' . '"></td>
-                                            <td style = "padding-left:10px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $days[$ids[0]][$mon]['Present'] . '</td>
-                                            <td style = "padding-left:70px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $working_days[$mon] . '</td>
-                                        <tr>';
-
-                                    $count++;
-                                    $i++;
-                                }
-                                echo '
-                                        </table>
-                                    </div>
-                                </div>';
-                                if ($report_type == "Normal") {
-                                    echo '
-                                <div style="height:1.5cm;">
-                                    <table>
-                                        <tr>
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Total'] . '</td>
-                                        </tr>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Percentage'] . '</td>
-                                        </tr>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Grade'] . '</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                ';
-                                } else {
-                                    echo '
-                                <div style="height:1.5cm;">
-                                    <table>
-                                        <tr>
-                                            <td style = "padding-left:1.5cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Total'] . '</td>
-                                            <td style = "padding-left:2cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Grade'] . '</td>
-                                            <td style = "padding-left:2.2cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Average'] . '</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                ';
-                                }
-                            }
-
-
                             foreach ($ids as $id) {
                                 echo '
-                                <div class="full-paper" style="padding-bottom:2.1cm;">
-                                <!--<div style="margin-left:3.7cm;padding-top:3.0cm;margin-bottom:0.8cm;">-->
-                                <div style="margin-left:3.3cm;padding-top:' . ($report_type == "Normal" ? '2.1' : '1.8') . 'cm;margin-bottom:' . ($report_type == "Normal" ? '1.0' : '0.4') . 'cm;">
+                            <div class="container" style="border:2px dashed black; margin-bottom:3%;">
+                                <table style="width:100%;">
+                                    <tr>
+                                        <td>
+                                            <img src="' . $_SESSION['school_db']['Media_Root_Dir'] . "/Victory Logo.png" . '" width="60px"/>
+                                        </td>
+                                        <td style="width:75%;height:100%;font-size:20px;font-weight:bold;text-align:center;">FUTUREGEN ENGLISH MEDIUM SCHOOL<br>RLY KODUR</td>
+                                        <td>Phone No:9558494484</td>
+                                    </tr>
+                                </table>
+                                <table style="width:100%;border:2px solid black;">
+                                    <tr>
+                                        <td style="margin-top:20px;padding-left:10px;width:65%;"><b>Student ID:         ' . $id . '</b></td>
+                                        <td style="margin-top:20px;"><b>Name:         ' . $names[$id] . '</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="margin-top:20px;padding-left:10px;width:65%;"><b>Name of the Examination:         ' . $exam . '</b></td>
+                                        <td style="margin-top:20px;padding-left:10px;"><b>Class:         ' . $class . ' ' . $section . '</b></td>
+                                    </tr>
+                                </table>
+                                <div class="main-container" style="margin-top:20px;display:flex;gap:150px;">
+                                    <div class="container" style="border:2px solid black;width:40%;height:200px;">
                                     <table>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $id . '</td>
-                                            <td></td>
-                                            <td style = "width:' . ($report_type == "Normal" ? '230' : '230') . 'px;"></td>
-                                            <td></td>
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';width:200px;" colspan="2">' . $names[$id] . '</td>
-                                        </tr>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $exam . '</td>
-                                            <td></td>'
-                                    . ($report_type == 'Normal' ? '<td style = "width:230px;"></td>' : '<td style = "width:230px;"></td>
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';">' . $max_marks . '</td>')
-                                    . '
-                                            <td style = "font-weight:bold;font-family:' . 'Arial' . ';' . ($report_type == "GPA" ? "padding-left:4cm;" : "") . '">' . $class . ' ' . $section . '</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                ';
+                                        <thead>
+                                            <th style="border-bottom:2px solid black;">Subject</th>
+                                            <th style="border-bottom:2px solid black;padding-left:50px;">Max Marks</th>
+                                            <th style="border-bottom:2px solid black;padding-left:50px;">Obtained</th>
+                                        </thead>
+                                        <tbody>
+                                    ';
                                 $count = 0;
-                                echo '<div class="main-container" style="display:flex;">
-                                <div class="" style="height:5.7cm;padding-top:0.2cm;">
-                                <table>';
                                 foreach ($subs as $sub) {
                                     echo '
                                         <tr>
-                                            <td style = "padding-left:' . ($report_type == "Normal" ? '15' : '0') . 'px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[0] . '</td>
-                                            <td style = "padding-left:' . ($report_type == "Normal" ? '75' : '50') . 'px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[1] . '</td>
-                                            <td style = "padding-left:' . ($report_type == "Normal" ? '75' : '55') . 'px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id][$count] . '</td>';
-                                    if ($report_type == "GPA") {
-                                        echo '<td style = "padding-left:65px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Sub_Grades']['sub' . ($count + 1)][0] . '</td>';
-                                    }
-                                    echo '<tr>';
-
+                                            <td style = "font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[0] . '</td>
+                                            <td style = "font-size:13px;padding-left:55px;font-weight:bold;font-family:' . 'Arial' . '">' . $sub[1] . '</td>
+                                            <td style = "font-size:13px;padding-left:55px;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id][$count] . '</td>
+                                        <tr>';
                                     $count++;
                                 }
-                                echo '</table>
-                                </div>';
-                                echo '
-                                <div class="" style="height:5.7cm;padding-top:0.4cm;">
-                                    <table>';
-
+                                echo '</tbody>
+                                </table>
+                                    </div>
+                                    <div class="container" style="border:2px solid black;width:30%;height:100%;">
+                                        <table>
+                                        <thead>
+                                            <tr>
+                                                <td colspan="3" style="text-align:center;border-bottom:2px solid black;">Days</td>
+                                            </tr>
+                                            <tr>
+                                                <th style="border-bottom:2px solid black;border-right:2px solid black;">Month</th>
+                                                <th style="border-bottom:2px solid black;border-right:2px solid black;">Working</th>
+                                                <th style="border-bottom:2px solid black;">Present</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>';
                                 foreach ($mon_arr as $mon) {
                                     echo '
                                         <tr>
-                                            <td style = "width:250px;font-family:' . 'Arial' . '"></td>
-                                            <td style = "padding-left:10px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $days[$id][$mon]['Present'] . '</td>
-                                            <td style = "padding-left:70px;font-size:13px;font-weight:bold;font-family:' . 'Arial' . '">' . $working_days[$mon] . '</td>
+                                            <td style = "width:250px;font-size:12px;font-family:' . 'Arial' . '">' . $mon . '</td>
+                                            <td style = "font-size:10px;padding-left:10px;border-left:2px solid black;font-weight:bold;font-family:' . 'Arial' . '">' . $working_days[$mon] . '</td>
+                                            <td style = "font-size:10px;padding-left:30px;border-left:2px solid black;font-weight:bold;font-family:' . 'Arial' . '">' . $days[$ids[0]][$mon]['Present'] . '</td>
                                         <tr>';
 
                                     $count++;
                                     $i++;
                                 }
-                                echo '
+                                echo '</body>
                                         </table>
                                     </div>
-                                </div>';
-                                if ($report_type == "Normal") {
-                                    echo '
-                                <div style="height:1.5cm;">
-                                    <table>
-                                        <tr>
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Total'] . '</td>
-                                        </tr>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Percentage'] . '</td>
-                                        </tr>
-                                        <tr style = "line-height:30px;">
-                                            <td style = "padding-left:2.8cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Grade'] . '</td>
-                                        </tr>
-                                    </table>
                                 </div>
-                                ';
-                                } else {
-                                    echo '
-                                <div style="height:1.5cm;">
-                                    <table>
-                                        <tr>
-                                            <td style = "padding-left:1.5cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Total'] . '</td>
-                                            <td style = "padding-left:2cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Grade'] . '</td>
-                                            <td style = "padding-left:2.5cm;font-weight:bold;font-family:' . 'Arial' . '">' . $marks[$id]['Average'] . '</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                ';
-                                }
-                                echo '</div>';
+                                <table style="padding-left:50px;margin-top:-50px;">
+                                    <tr>
+                                        <td><b style="padding-right:75px;">Total</b>' . $marks[$id]['Total'] . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b style="padding-right:35px;">Percentage</b>' . $marks[$id]['Percentage'] . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b style="padding-right:65px;">Grade</b>' . $marks[$id]['Grade'] . '</td>
+                                    </tr>
+                                </table>
+                                <table style="padding-top:40px;">
+                                    <tr>
+                                        <td style="width:40%;">Class Teacher</td>
+                                        <td style="width:70%;">Correspondent/Principal</td>
+                                        <td>Parent/Guardian</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            ';
                             }
                         } else {
                             echo "<script>alert('Please Select Exam!!')</script>";
