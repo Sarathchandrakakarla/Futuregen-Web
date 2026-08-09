@@ -168,7 +168,7 @@ error_reporting(0);
             <option selected disabled>-- Select Exam --</option>
             <optgroup label="Assignments">
               <?php
-              for ($i = 1; $i <= 8; $i++) {
+              for ($i = 1; $i <= 4; $i++) {
                 echo '<option value="ASS-' . $i . '">ASS-' . $i . '</option>';
               }
               ?>
@@ -180,57 +180,12 @@ error_reporting(0);
               }
               ?>
             </optgroup>
-            <optgroup label="Unit Tests">
-              <?php
-              for ($i = 1; $i <= 4; $i++) {
-                echo '<option value="UNIT-' . $i . '">UNIT-' . $i . '</option>';
-              }
-              ?>
-            </optgroup>
             <optgroup label="Summative Assessments">
               <?php
               for ($i = 1; $i <= 3; $i++) {
                 echo '<option value="SA-' . $i . '">SA-' . $i . '</option>';
               }
               ?>
-            </optgroup>
-            <optgroup label="Semesters">
-              <?php
-              for ($i = 1; $i <= 3; $i++) {
-                echo '<option value="SEMESTER-' . $i . '">SEMESTER-' . $i . '</option>';
-              }
-              ?>
-            </optgroup>
-            <optgroup label="Revision Tests">
-              <?php
-              for ($i = 1; $i <= 8; $i++) {
-                echo '<option value="REVISION-' . $i . '">REVISION-' . $i . '</option>';
-              }
-              ?>
-            </optgroup>
-            <optgroup label="Grand Tests">
-              <?php
-              for ($i = 1; $i <= 5; $i++) {
-                echo '<option value="GRAND-TEST-' . $i . '">GRAND-TEST-' . $i . '</option>';
-              }
-              ?>
-            </optgroup>
-            <optgroup label="Objective Exams">
-              <?php
-              for ($i = 1; $i <= 4; $i++) {
-                echo '<option value="OBJECTIVE-EXAM-' . $i . '">OBJECTIVE-EXAM-' . $i . '</option>';
-              }
-              ?>
-            </optgroup>
-            <optgroup label="Pre-Finals and Finals">
-              <option value="QUARTERLY">QUARTERLY</option>
-              <option value="HALFYEARLY">HALFYEARLY</option>
-              <option value="PRE-FINAL">PRE-FINAL</option>
-              <option value="ANNUAL">ANNUAL</option>
-            </optgroup>
-            <optgroup label="Others">
-              <option value="Drawing">Drawing</option>
-              <option value="IIT-EXAM">IIT-EXAM</option>
             </optgroup>
           </select>
         </div>
