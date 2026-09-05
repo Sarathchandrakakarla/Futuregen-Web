@@ -179,10 +179,13 @@ error_reporting(0);
                                     if (mysqli_num_rows($result1) == 0) {
                                         echo "<script>alert('There are No subjects corresponding to this Class and Exam');</script>";
                                     } else {
+                                        $subjects = array();
                                         while ($row1 = mysqli_fetch_assoc($result1)) {
+                                            $subjects[] = $row1;
                                             echo '
                                         <th>' . $row1['Subjects'] . '</th>';
                                         }
+                                        $subject_count = count($subjects);
                                         echo '<tbody id="tbody">';
                                         $sql = "SELECT * FROM `student_master_data` WHERE Stu_Class = '$class' AND Stu_Section = '$section'";
                                         $result = mysqli_query($link, $sql);
@@ -195,16 +198,13 @@ error_reporting(0);
                                             <td>' . $exam . '</td>
                                             <td>' . $row['Stu_Class'] . '</td>
                                             <td>' . $row['Stu_Section'] . '</td>';
-                                            $result1 = mysqli_query($link, "SELECT * FROM `class_wise_subjects` WHERE Class = '$class' AND Exam = '$exam'");
-                                            $j = 0;
                                             $sub_count = 1;
-                                            while ($row1 = mysqli_fetch_assoc($result1)) {
-                                                $res = mysqli_query($link, "SELECT * FROM `stu_marks` WHERE Id_No = '" . $row['Id_No'] . "' AND Exam = '" . $exam . "'");
-                                                $row2 = mysqli_fetch_assoc($res);
+                                            $res = mysqli_query($link, "SELECT * FROM `stu_marks` WHERE Id_No = '" . $row['Id_No'] . "' AND Exam = '" . $exam . "'");
+                                            $row2 = mysqli_fetch_assoc($res);
+                                            foreach ($subjects as $row1) {
                                                 echo '
-                                            <td><input type="text" class="form-control mark" value="' . $row2["sub" . $sub_count] . '" name="mark[]" onfocus="this.select();" id="markinp" style="width:50px;" ' . (!can('create', MENU_ID) ? 'disabled' : '') . '></td>';
+                                            <td><input type="text" class="form-control mark" data-max="' . $row1['Max_Marks'] . '" value="' . $row2["sub" . $sub_count] . '" name="mark[]" onfocus="this.select();" style="width:50px;" ' . (!can('create', MENU_ID) ? 'disabled' : '') . '></td>';
                                                 $sub_count++;
-                                                $j++;
                                             }
                                             echo '</tr>';
                                             $k++;
@@ -232,7 +232,7 @@ error_reporting(0);
                         <?php if (!can('create', MENU_ID)) { ?>
                         title="You don't have permission to insert into this report"
                         <?php } ?>>
-                        <button class="btn btn-primary" type="submit" name="add" onclick="if(!confirm('Confirm to Upload Marks?'))return false; else return true;" <?php echo !can('create', MENU_ID) ? 'disabled' : ''; ?>>Upload Marks</button>
+                        <button class="btn btn-primary" type="submit" name="add" onclick="return validateAndConfirmUpload();" <?php echo !can('create', MENU_ID) ? 'disabled' : ''; ?>>Upload Marks</button>
                     </div>
                 </div>
             </div>
@@ -433,13 +433,112 @@ error_reporting(0);
     </script>
 
     <script>
+        function setMarkInputValidity(input, isValid) {
+            input.style.borderColor = isValid ? "" : "red";
+            input.style.borderWidth = isValid ? "" : "2px";
+        }
+
+        function validateMarkInput(input, showAlert = false) {
+            const rawValue = input.value.trim();
+            const maxMarks = parseFloat(input.dataset.max);
+
+            if (rawValue === "") {
+                setMarkInputValidity(input, true);
+                return {
+                    valid: true
+                };
+            }
+
+            if (rawValue === "a") {
+                input.value = "A";
+                setMarkInputValidity(input, true);
+                return {
+                    valid: true
+                };
+            }
+
+            if (rawValue === "A") {
+                setMarkInputValidity(input, true);
+                return {
+                    valid: true
+                };
+            }
+
+            if (!/^-?\d+(\.\d+)?$/.test(rawValue)) {
+                setMarkInputValidity(input, false);
+                if (showAlert) {
+                    alert("Only marks, A, or an empty value are allowed.");
+                }
+                return {
+                    valid: false
+                };
+            }
+
+            const marks = parseFloat(rawValue);
+            if (marks < 0 || marks > maxMarks) {
+                setMarkInputValidity(input, false);
+                if (showAlert) {
+                    event.preventDefault();
+                    alert("Entered marks must be between 0 and " + maxMarks + ".");
+                }
+                return {
+                    valid: false
+                };
+            }
+
+            setMarkInputValidity(input, true);
+            return {
+                valid: true
+            };
+        }
+
+        function validateAllMarkInputs(showAlert = false) {
+            const markInputs = document.querySelectorAll(".mark");
+            for (const input of markInputs) {
+                const result = validateMarkInput(input, showAlert);
+                if (!result.valid) {
+                    input.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function validateAndConfirmUpload() {
+            if (!validateAllMarkInputs(true)) {
+                return false;
+            }
+            return confirm('Confirm to Upload Marks?');
+        }
+
+        document.addEventListener("input", function(event) {
+            if (event.target.classList.contains("mark")) {
+                validateMarkInput(event.target, false);
+            }
+        });
+
+        document.addEventListener("blur", function(event) {
+            if (event.target.classList.contains("mark")) {
+                const result = validateMarkInput(event.target, true);
+                if (!result.valid) {
+                    setTimeout(() => {
+                        event.target.focus();
+                        event.target.select();
+                    }, 0);
+                }
+            }
+        }, true);
+
         // JavaScript code to handle down arrow key navigation
         document.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 const focusedInput = document.activeElement;
-                const allInputs = document.querySelectorAll("#marks-table tbody tr .form-control");
+                const allInputs = document.querySelectorAll("#marks-table tbody tr .mark");
                 const currentIndex = Array.from(allInputs).indexOf(focusedInput);
-                const subjectsCount = parseInt('<?php echo isset($sub_count) ? $sub_count : 0; ?>');
+                const subjectsCount = parseInt('<?php echo isset($subject_count) ? $subject_count : 0; ?>');
+                if (currentIndex === -1 || subjectsCount <= 0) {
+                    return;
+                }
                 const nextIndex = (currentIndex + subjectsCount - 1);
                 event.preventDefault();
                 $(allInputs[nextIndex]).focus().select();
