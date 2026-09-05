@@ -711,7 +711,7 @@ error_reporting(0);
             $mobile  = $student[5];
 
 
-            $pdfUrl = "https://victoryschools.in/Futuregen/Files/"
+            $pdfUrl = "https://futuregenschool.com/Futuregen/Files/"
                 . $class . " " . $section . "/"
                 . $exam . "/"
                 . $id . ".pdf";
