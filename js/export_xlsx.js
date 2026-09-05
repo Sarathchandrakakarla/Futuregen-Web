@@ -9,7 +9,6 @@ let ExcelJS = null;
     ExcelJS = (await import("https://cdn.jsdelivr.net/npm/exceljs/+esm"))
       .default;
 
-    console.log("ExcelJS Loaded");
   } catch (err) {
     console.error("ExcelJS Load Failed", err);
   }
