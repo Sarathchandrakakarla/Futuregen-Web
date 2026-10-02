@@ -4,26 +4,32 @@ if (!isset($_SESSION['school_db'])) {
   header('Location: /Futuregen/Welcome/preindex.php');
   exit;
 }
+require_once __DIR__ . '/link.php';
 
-$documents = [
-  "Government Approvals" => [
-    [
-      "title" => "Victory's Futuregen School Permission Proceedings",
-      "thumbnail" => "/Futuregen/Images/approvals/Permission1.jpg",
-      "files" => [
-        "/Futuregen/Images/approvals/Permission1.jpg",
-        "/Futuregen/Images/approvals/Permission2.jpg"
-      ]
-    ],
-    [
-      "title" => "Victory's Futuregen School Recognition",
-      "thumbnail" => "/Futuregen/Images/approvals/Victory's Futuregen School Recognition.jpg",
-      "files" => [
-        "/Futuregen/Images/approvals/Victory's Futuregen School Recognition.pdf",
-      ]
-    ],
-  ],
-];
+$documents = [];
+$result = mysqli_query($link, "SELECT id, category, title, files FROM mandatory_disclosures WHERE status = 1 ORDER BY category, display_order, id");
+if ($result) {
+  while ($row = mysqli_fetch_assoc($result)) {
+    // Stored JSON paths are relative to the disclosure's directory.
+    $disclosureId = (int)$row['id'];
+    $storedItems = json_decode($row['files'], true) ?: [];
+    $files = [];
+    $thumbnail = '';
+    foreach ($storedItems as $index => $entry) {
+      $filename = is_string($entry) ? $entry : (is_array($entry) && isset($entry['file']) ? $entry['file'] : '');
+      if ($filename === '') continue;
+      $actualUrl = '/Futuregen/Images/mandatory_disclosures/' . $disclosureId . '/' . rawurlencode(basename($filename));
+      $files[] = $actualUrl;
+      if ($index === 0) {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if (in_array($extension, ['jpg', 'jpeg', 'png'], true)) $thumbnail = $actualUrl;
+        elseif (is_array($entry) && !empty($entry['thumbnail'])) $thumbnail = '/Futuregen/Images/mandatory_disclosures/' . $disclosureId . '/' . rawurlencode(basename($entry['thumbnail']));
+        else $thumbnail = '/Futuregen/Images/pdf-icon.png';
+      }
+    }
+    $documents[$row['category']][] = ['title' => $row['title'], 'files' => $files, 'thumbnail' => $thumbnail];
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -428,7 +434,7 @@ $documents = [
     <ul>
       <li><a href="/Futuregen/index.php">Home</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
-      <li><a class="active" href="#approvals-section">Approvals & Affiliations</a></li>
+      <li><a class="active" href="#approvals-section">Mandatory Disclosures</a></li>
       <!--<li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>-->
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
       <!--<li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
@@ -447,9 +453,9 @@ $documents = [
   <section id="approvals-section" class="approvals-section">
     <div class="container">
       <div class="text-center mb-5">
-        <h1 class="mb-3">Approvals & Affiliations</h1>
+        <h1 class="mb-3">Mandatory Disclosures</h1>
         <p class="approvals-intro">
-          Our institution is committed to maintaining recognized standards of education and administration. Below are the key approvals and affiliation documents that reflect our compliance and academic credibility.
+          View the documents and information published by our institution in accordance with applicable disclosure requirements.
         </p>
       </div>
 
@@ -460,10 +466,7 @@ $documents = [
             <?php foreach ($items as $document): ?>
               <?php
               $documentFiles = isset($document['files']) && is_array($document['files']) ? $document['files'] : [];
-              $thumbnail = isset($document['thumbnail']) && $document['thumbnail'] !== '' ? $document['thumbnail'] : (isset($documentFiles[0]) ? $documentFiles[0] : '');
-              if ($thumbnail !== '' && strtolower(pathinfo(parse_url($thumbnail, PHP_URL_PATH), PATHINFO_EXTENSION)) === 'pdf') {
-                $thumbnail = '/Futuregen/Images/pdf-icon.png';
-              }
+              $thumbnail = isset($document['thumbnail']) ? $document['thumbnail'] : '';
               ?>
               <div class="col-12 col-sm-6 col-md-6 col-lg-3 d-flex">
                 <div class="card approval-card w-100">
@@ -503,7 +506,7 @@ $documents = [
         <div class="modal-body text-center">
           <div id="approvalModalToggleWrap" class="btn-group mb-3 d-none" role="group" aria-label="Document side toggle">
           </div>
-          <img src="" alt="Approval Document" id="approvalModalImage" class="approval-modal-image img-fluid">
+          <img src="" alt="Mandatory Disclosure" id="approvalModalImage" class="approval-modal-image img-fluid">
           <iframe id="approvalModalPDF" class="w-100 d-none" style="height:75vh;"></iframe>
         </div>
       </div>

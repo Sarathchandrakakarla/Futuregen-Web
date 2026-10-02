@@ -249,6 +249,7 @@ if (!isset($_SESSION['school_db'])) {
     <ul>
       <li><a href="/Futuregen/index.php">Home</a></li>
       <li><a href="<?= $_SESSION['school_db']['Root_Dir'] ?>/about.php">About</a></li>
+      <li><a href="/Futuregen/approvals.php">Mandatory Disclosures</a></li>
       <!--<li><a href="/Futuregen/Gallery/gallery.php">Gallery</a></li>-->
       <li><a class="active" href="<?= $_SESSION['school_db']['Root_Dir'] ?>/contact.php">Contact</a></li>
       <!--<li><a href="/Futuregen/youtube.php" id="link">Our Stories</a></li>
