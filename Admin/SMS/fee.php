@@ -567,7 +567,7 @@ error_reporting(0);
                                             //Fetching Committed Fees of Each Student
                                             $query2 = mysqli_query($link, "SELECT Total FROM `stu_fee_master_data` WHERE Id_No = '$id' AND Type = '$type'");
                                             if (mysqli_num_rows($query2) == 0) {
-                                                if ($type != "Admission Fee") {
+                                                if ($type != "Admission Fee" && $type != "Hostel Fee") {
                                                     echo "<script>alert('" . $id . " Not Available in Stu Fee Master Data! ')</script>";
                                                 }
                                             } else {
@@ -663,7 +663,7 @@ error_reporting(0);
                                             //Fetching Committed Fees of Each Student
                                             $query2 = mysqli_query($link, "SELECT Total FROM `stu_fee_master_data` WHERE Id_No = '$id' AND Type = '$type'");
                                             if (mysqli_num_rows($query2) == 0) {
-                                                if ($type != "Admission Fee") {
+                                                if ($type != "Admission Fee" && $type != "Hostel Fee") {
                                                     echo "<script>alert('" . $id . " Not Available in Stu Fee Master Data! ')</script>";
                                                 }
                                             } else {
@@ -851,15 +851,15 @@ error_reporting(0);
             $(".student:checked").each(function() {
                 if (!all_students.checked) {
                     if (type.value == "Vehicle Fee") {
-                        absentees.push($(this).parent().siblings().eq(6).children().attr('href'));
+                        absentees.push($(this).parent().siblings().eq(5).children().attr('href'));
                     } else {
-                        absentees.push($(this).parent().siblings().eq(6).children().attr('href'));
+                        absentees.push($(this).parent().siblings().eq(4).children().attr('href'));
                     }
                 } else {
                     if (type.value == "Vehicle Fee") {
                         absentees.push($(this).parent().siblings().eq(6).children().attr('href'));
                     } else {
-                        absentees.push($(this).parent().siblings().eq(6).children().attr('href'));
+                        absentees.push($(this).parent().siblings().eq(5).children().attr('href'));
                     }
                 }
                 //mywin = window.open($(this).parent().siblings().eq(4).children().attr('href'), '_blank')
